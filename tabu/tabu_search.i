@@ -1,8 +1,8 @@
-%module tabu_solver
+%module tabu_search
 
 %{
-#include "tabu.h"
-#include "common.h"
+#include "src/tabu_search.h"
+#include "src/common.h"
 %}
 
 %include "stdint.i"
@@ -47,5 +47,5 @@ solution = handler.bestSolution()"
     }
 }
 
-%include "tabu.h"
-%include "common.h"
+%include "src/tabu_search.h"
+%include "src/common.h"

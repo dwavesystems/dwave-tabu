@@ -1,6 +1,6 @@
 #include "common.h"
 #include <limits>
-#include "tabu.h"
+#include "tabu_search.h"
 #include "bqpSolver.h"
 
 using std::vector;
@@ -55,6 +55,3 @@ vector<int> TabuSearch::bestSolution()
 {
     return bqp.solution;
 }
-
-
-
