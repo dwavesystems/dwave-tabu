@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from tabu.tabu_search import TabuSearch
+from tabu import TabuSearch
 
 # creating the problem
 q = [[-1, 2, 1], [2, -3, -4.5], [1, -4.5, 3.25]]
