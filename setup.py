@@ -22,12 +22,14 @@ ext_modules = [
     Extension(
         name='tabu._tabu_search',
         sources=[
-            'tabu/tabu_search.i',
-            'tabu/src/tabu_search.cc',
-            'tabu/src/bqpSolver.cpp',
-            'tabu/src/bqpUtil.cpp'
+            os.path.join('tabu', 'tabu_search.i'),
+            os.path.join('tabu', 'src', 'tabu_search.cc'),
+            os.path.join('tabu', 'src', 'bqpSolver.cpp'),
+            os.path.join('tabu', 'src', 'bqpUtil.cpp')
         ],
-        include_dirs=['tabu/src'],
+        include_dirs=[
+            os.path.join('tabu', 'src')
+        ],
         swig_opts=['-c++']
     )
 ]
