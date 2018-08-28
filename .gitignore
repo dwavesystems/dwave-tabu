@@ -1,6 +1,6 @@
 env/
 build/
 *.pyc
-_tabu_search.so
+_tabu_search.*so
 tabu_search_wrap.cpp
 tabu_search.py
