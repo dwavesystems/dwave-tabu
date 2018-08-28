@@ -1,25 +1,23 @@
 import random
 
-import tabu_solver
-from dimod.core.sampler import Sampler
-from dimod.response import Response
-from dimod.vartypes import Vartype
+import numpy
+import dimod
 
-# TODO: re-implement/copy when extracted to dwave-tabu
-from hades.utils import sample_as_list, sample_as_dict, random_sample
+from tabu import TabuSearch
 
 
-class TabuSampler(Sampler):
+class TabuSampler(dimod.Sampler):
     """A dimod sampler wrapper for the Tabu solver.
 
     Examples:
         This example solves a two-variable Ising model.
 
-        >>> import dimod
-        >>> response = TabuSampler().sample_ising(
-        ...                     {'a': -0.5, 'b': 1.0}, {('a', 'b'): -1})
+        >>> from tabu import TabuSampler
+        >>> response = TabuSampler().sample_ising({'a': -0.5, 'b': 1.0}, {('a', 'b'): -1})
+        >>> list(response.data())
+        [Sample(sample={'a': -1, 'b': -1}, energy=-1.5, num_occurrences=1)]
         >>> response.data_vectors['energy']
-        array([-1.5, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5])
+        array([-1.5])
 
     """
 
@@ -73,14 +71,14 @@ class TabuSampler(Sampler):
         # input checking and defaults calculation
         # TODO: one "read" per sample in init_solution sampleset
         if init_solution is not None:
-            if not isinstance(init_solution, Response):
+            if not isinstance(init_solution, dimod.Response):
                 raise TypeError("'init_solution' should be a 'dimod.Response' instance")
             if len(init_solution.record) < 1:
                 raise ValueError("'init_solution' should contain at least one sample")
             if len(init_solution.record[0].sample) != len(bqm):
                 raise ValueError("'init_solution' sample dimension different from BQM")
             init_sample = self._bqm_sample_to_tabu_sample(
-                init_solution.change_vartype(Vartype.BINARY, inplace=False).record[0].sample, bqm.binary)
+                init_solution.change_vartype(dimod.BINARY, inplace=False).record[0].sample, bqm.binary)
         else:
             init_sample = None
 
@@ -103,15 +101,15 @@ class TabuSampler(Sampler):
         energies = []
         for _ in range(num_reads):
             if init_sample is None:
-                init_sample = self._bqm_sample_to_tabu_sample(random_sample(bqm.binary), bqm.binary)
-            r = tabu_solver.TabuSearch(qubo, init_sample, tenure, scale_factor, timeout)
+                init_sample = self._bqm_sample_to_tabu_sample(self._random_sample(bqm.binary), bqm.binary)
+            r = TabuSearch(qubo, init_sample, tenure, scale_factor, timeout)
             sample = self._tabu_sample_to_bqm_sample(list(r.bestSolution()), bqm.binary)
             energy = bqm.binary.energy(sample)
             samples.append(sample)
             energies.append(energy)
 
-        response = Response.from_samples(
-            samples, {'energy': energies}, info={}, vartype=Vartype.BINARY)
+        response = dimod.Response.from_samples(
+            samples, {'energy': energies}, info={}, vartype=dimod.BINARY)
         response.change_vartype(bqm.vartype, inplace=True)
         return response
 
@@ -126,7 +124,7 @@ class TabuSampler(Sampler):
 
     def _bqm_sample_to_tabu_sample(self, sample, bqm):
         assert len(sample) == len(bqm)
-        _, values = zip(*sorted(sample_as_dict(sample).items()))
+        _, values = zip(*sorted(self._sample_as_dict(sample).items()))
         return list(map(int, values))
 
     def _tabu_sample_to_bqm_sample(self, sample, bqm):
@@ -134,20 +132,32 @@ class TabuSampler(Sampler):
         assert len(sample) == len(varorder)
         return dict(zip(varorder, sample))
 
+    def _sample_as_dict(self, sample):
+        """Convert list-like ``sample`` (list/dict/dimod.SampleView),
+        ``list: var``, to ``map: idx -> var``.
+        """
+        if isinstance(sample, dict):
+            return sample
+        if isinstance(sample, (list, numpy.ndarray)):
+            sample = enumerate(sample)
+        return dict(sample)
+
+    def _random_sample(self, bqm):
+        values = list(bqm.vartype.value)
+        return {i: random.choice(values) for i in bqm.variables}
+
 
 if __name__ == "__main__":
-    import dimod
     from pprint import pprint
 
     print("TabuSampler:")
-    bqm = dimod.BinaryQuadraticModel({'a': 0.0, 'b': -1.0, 'c': 0.5}, {('a', 'b'): -1.0, ('b', 'c'): 1.5}, 1, dimod.BINARY)
+    bqm = dimod.BinaryQuadraticModel(
+        {'a': 0.0, 'b': -1.0, 'c': 0.5},
+        {('a', 'b'): -1.0, ('b', 'c'): 1.5},
+        offset=0.0, vartype=dimod.BINARY)
     response = TabuSampler().sample(bqm, num_reads=10)
     pprint(list(response.data()))
 
     print("ExactSolver:")
     response = dimod.ExactSolver().sample(bqm)
-    pprint(list(response.data()))
-
-    print("Sampling Ising:")
-    response = TabuSampler().sample_ising({'a': -0.5, 'b': 1.0}, {('a', 'b'): -1}, num_reads=10)
-    pprint(list(response.data()))
+    pprint(list(response.data(sorted_by='energy')))
