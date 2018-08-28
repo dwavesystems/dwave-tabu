@@ -1,5 +1,6 @@
-# Running tabu search example
-import tabu_solver
+from __future__ import print_function
+
+from tabu.tabu_search import TabuSearch
 
 # creating the problem
 q = [[-1, 2, 1], [2, -3, -4.5], [1, -4.5, 3.25]]
@@ -9,12 +10,9 @@ scale_factor = 4
 timeout = 100  # millisecond
 
 # Running the solver
-r = tabu_solver.TabuSearch(q, init_solution, tenure, scale_factor, timeout)
+r = TabuSearch(q, init_solution, tenure, scale_factor, timeout)
 
 # Printing the results
-print "q = "
-for i in q:
-    print i
-print "best energy = ", r.bestEnergy()
-print "best state  = " , r.bestSolution()
-
+print("qubo =", q)
+print("best energy =", r.bestEnergy())
+print("best sample =", r.bestSolution())
