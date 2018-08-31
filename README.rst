@@ -16,7 +16,7 @@ Installation or Building
 
 .. installation-start-marker
 
-.. note:: Package not yet available on PyPI.
+**Package not yet available on PyPI.**
 
 A wheel might be available for your system on PyPI. Source distributions are provided as well.
 
@@ -39,6 +39,8 @@ Example
 =======
 
 .. example-start-marker
+
+This example solves a two-variable Ising model.
 
 >>> from tabu import TabuSampler
 >>> response = TabuSampler().sample_ising({'a': -0.5, 'b': 1.0}, {('a', 'b'): -1})

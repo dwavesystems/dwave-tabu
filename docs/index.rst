@@ -23,12 +23,14 @@ Documentation
 
 .. only:: html
 
+  :Release: |version|
   :Date: |today|
 
 .. toctree::
   :maxdepth: 1
 
   intro
+  reference/index
   installation
   license
 
