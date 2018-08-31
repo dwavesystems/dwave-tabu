@@ -1,3 +1,8 @@
+"""
+A dimod sampler_ that uses the MST2 multistart tabu search algorithm.
+
+"""
+
 import random
 
 import numpy
@@ -7,7 +12,7 @@ from tabu import TabuSearch
 
 
 class TabuSampler(dimod.Sampler):
-    """A dimod sampler wrapper for the Tabu solver.
+    """A tabu-search sampler.
 
     Examples:
         This example solves a two-variable Ising model.
@@ -32,25 +37,27 @@ class TabuSampler(dimod.Sampler):
         self.properties = {}
 
     def sample(self, bqm, init_solution=None, tenure=None, scale_factor=1, timeout=20, num_reads=1):
-        """Run Tabu search on `bqm` and return the best solution found within
-        `timeout` milliseconds.
+        """Run a tabu search on a given binary quadratic model.
 
         Args:
             bqm (:obj:`~dimod.BinaryQuadraticModel`):
-                Binary quadratic model to be sampled from.
+                The binary quadratic model (BQM) to be sampled.
             init_solution (:obj:`~dimod.Response`, optional):
-                Sample set of one which defines the initial state of each variable.
-                Defaults to a random sample.
+                Single sample that sets an initial state for all the problem variables.
+                Default is a random initial state.
             tenure (int, optional):
-                Tabu tenure. Defaults to: min(20, num_vars / 4).
+                Tabu tenure, which is the length of the tabu list, or number of recently
+                explored solutions kept in memory.
+                Default is a quarter of the number of problem variables up to
+                a maximum value of 20.
             scale_factor (number, optional):
-                Scaling factor for biases/couplings in BQM. Internally, BQM is
-                converted to QUBO matrix, and elements are stored as long ints
+                Scaling factor for linear and quadratic biases in the BQM. Internally, the BQM is
+                converted to a QUBO matrix, and elements are stored as long ints
                 using ``internal_q = long int (q * scale_factor)``.
             timeout (int, optional):
                 Total running time in milliseconds.
-            num_reads (int, optional): Number of reads. Each sample is the result of
-                a single run of the simulated annealing algorithm.
+            num_reads (int, optional): Number of reads. Each run of the tabu algorithm
+                generates a sample.
 
         Returns:
             :obj:`~dimod.Response`: A `dimod` :obj:`.~dimod.Response` object.
@@ -58,13 +65,14 @@ class TabuSampler(dimod.Sampler):
         Examples:
             This example provides samples for a two-variable QUBO model.
 
+            >>> from tabu import TabuSampler
             >>> import dimod
-            >>> sampler = dimod.TabuSampler()
+            >>> sampler = TabuSampler()
             >>> Q = {(0, 0): -1, (1, 1): -1, (0, 1): 2}
             >>> bqm = dimod.BinaryQuadraticModel.from_qubo(Q, offset = 0.0)
             >>> response = sampler.sample(bqm)
             >>> response.data_vectors['energy']
-            array([-1., -1.])
+            array([-1.])
 
         """
 
