@@ -33,7 +33,8 @@ class TabuSampler(dimod.Sampler):
         self.parameters = {'tenure': [],
                            'scale_factor': [],
                            'timeout': [],
-                           'num_reads': []}
+                           'num_reads': [],
+                           'init_solution': []}
         self.properties = {}
 
     def sample(self, bqm, init_solution=None, tenure=None, scale_factor=1, timeout=20, num_reads=1):
@@ -89,6 +90,9 @@ class TabuSampler(dimod.Sampler):
                 init_solution.change_vartype(dimod.BINARY, inplace=False).record[0].sample, bqm.binary)
         else:
             init_sample = None
+
+        if not bqm:
+            return dimod.Response.from_samples([], {'energy': []}, info={}, vartype=bqm.vartype)
 
         if tenure is None:
             tenure = int(max(min(20, len(bqm) / 4), 1))
