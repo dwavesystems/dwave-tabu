@@ -31,6 +31,11 @@ jobs:
             - ./env
           key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
 
+      - run:
+          name: install swig
+          command: |
+            sudo apt-get install swig
+
       - run: &install-package-template
           name: install package
           command: |
@@ -119,6 +124,11 @@ jobs:
           paths:
             - ~/.pyenv
           key: pyenv-{{ .Environment.CIRCLE_JOB }}
+
+      - run:
+          name: install swig
+          command: |
+            brew install swig
 
       - run:
           name: create virtualenv
