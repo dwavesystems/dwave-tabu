@@ -47,11 +47,11 @@ jobs:
       - store_artifacts:
           path: ./htmlcov
 
-      - run:
-          name: codecov
-          command: |
-            . env/bin/activate
-            codecov
+#      - run:
+#          name: codecov
+#          command: |
+#            . env/bin/activate
+#            codecov
 
       - run:
           name: doctest
