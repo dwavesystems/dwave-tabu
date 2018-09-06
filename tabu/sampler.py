@@ -34,7 +34,7 @@ class TabuSampler(dimod.Sampler):
 
         >>> from tabu import TabuSampler
         >>> response = TabuSampler().sample_ising({'a': -0.5, 'b': 1.0}, {('a', 'b'): -1})
-        >>> list(response.data())
+        >>> list(response.data()) # doctest: +SKIP
         [Sample(sample={'a': -1, 'b': -1}, energy=-1.5, num_occurrences=1)]
         >>> response.data_vectors['energy']
         array([-1.5])
