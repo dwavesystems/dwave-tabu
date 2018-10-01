@@ -1,18 +1,17 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(minorminer)
+project(tabu)
 # set(VERSION_MAJOR 2)
 # set(VERSION_MINOR 5)
 # set(VERSION_PATCH 0)
 
-option(MINORMINER_BUILD_TESTS "Build unit tests." OFF)
-option(MINORMINER_BUILD_EXAMPLES "Build examples." OFF)
+option(TABU_BUILD_TESTS "Build unit tests." OFF)
 
-add_library(minorminer INTERFACE)
-target_include_directories(minorminer INTERFACE ${PROJECT_SOURCE_DIR}/include)
+add_library(tabu INTERFACE)
+target_include_directories(tabu INTERFACE ${PROJECT_SOURCE_DIR}/tabu/src)
 
 
-if(MINORMINER_BUILD_TESTS)
+if(TABU_BUILD_TESTS)
     # Download and unpack googletest at configure time
     configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
     execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -47,8 +46,4 @@ if(MINORMINER_BUILD_TESTS)
 
     enable_testing()
     add_subdirectory(tests)
-endif()
-
-if(MINORMINER_BUILD_EXAMPLES)
-    add_subdirectory(examples)
 endif()

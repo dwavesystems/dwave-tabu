@@ -187,6 +187,29 @@ jobs:
       PYTHON: 2.7.15
       HOMEBREW_NO_AUTO_UPDATE: 1
 
+  cpp-tests:
+    docker:
+      # just use a python image, all we really want is debian
+      - image: circleci/python:3.6-jessie
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: Installing gcc and cmake
+          command: sudo apt-get install -y gcc g++ cmake
+
+      - run:
+          name: run c++ tests
+          command: |
+            mkdir -p build
+            cd build
+            cmake .. -DTABU_BUILD_TESTS=ON
+            make
+            ./tests/run_tests
+
 ##################################################################################################
 # Deploy
 ##################################################################################################
@@ -340,6 +363,7 @@ workflows:
       - test-osx-3.5
       - test-osx-3.4
       - test-osx-2.7
+      - cpp-tests
 
   deploy:
     jobs:
