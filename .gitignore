@@ -1,6 +1,8 @@
 env/
 build/
 *.pyc
+__pycache__/
 _tabu_search.*so
 tabu_search_wrap.cpp
 tabu_search.py
+.coverage
