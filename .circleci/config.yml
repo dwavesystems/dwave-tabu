@@ -63,6 +63,7 @@ jobs:
           command: |
             . env/bin/activate
             pip install .
+            pip install -r docs/requirements.txt
             make -C docs/ doctest
 
       - run: &sdist-build-template
