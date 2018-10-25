@@ -187,6 +187,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
-                       'dimod': ('http://dimod.readthedocs.io/en/stable/', None),
-                       }
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'dimod': ('https://docs.ocean.dwavesys.com/projects/dimod/en/latest/', None),
+}
