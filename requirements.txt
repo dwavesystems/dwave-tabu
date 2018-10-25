@@ -1,9 +1,2 @@
 numpy==1.15.1
 dimod==0.7.9
-
-coverage
-codecov
-
-sphinx
-sphinx_rtd_theme
-recommonmark
