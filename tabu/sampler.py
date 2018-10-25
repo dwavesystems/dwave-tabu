@@ -107,7 +107,7 @@ class TabuSampler(dimod.Sampler):
             init_sample = None
 
         if not bqm:
-            return dimod.Response.from_samples([], energy=0, vartype=bqm.vartype)
+            return dimod.SampleSet.from_samples([], energy=0, vartype=bqm.vartype)
 
         if tenure is None:
             tenure = int(max(min(20, len(bqm) / 4), 1))
