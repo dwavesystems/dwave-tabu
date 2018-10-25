@@ -33,11 +33,11 @@ class TabuSampler(dimod.Sampler):
         This example solves a two-variable Ising model.
 
         >>> from tabu import TabuSampler
-        >>> response = TabuSampler().sample_ising({'a': -0.5, 'b': 1.0}, {('a', 'b'): -1})
-        >>> list(response.data()) # doctest: +SKIP
+        >>> samples = TabuSampler().sample_ising({'a': -0.5, 'b': 1.0}, {'ab': -1})
+        >>> list(samples.data()) # doctest: +SKIP
         [Sample(sample={'a': -1, 'b': -1}, energy=-1.5, num_occurrences=1)]
-        >>> response.data_vectors['energy']
-        array([-1.5])
+        >>> samples.first.energy
+        -1.5
 
     """
 
@@ -85,10 +85,10 @@ class TabuSampler(dimod.Sampler):
             >>> import dimod
             >>> sampler = TabuSampler()
             >>> Q = {(0, 0): -1, (1, 1): -1, (0, 1): 2}
-            >>> bqm = dimod.BinaryQuadraticModel.from_qubo(Q, offset = 0.0)
-            >>> response = sampler.sample(bqm)
-            >>> response.data_vectors['energy']
-            array([-1.])
+            >>> bqm = dimod.BinaryQuadraticModel.from_qubo(Q, offset=0.0)
+            >>> samples = sampler.sample(bqm)
+            >>> samples.record[0].energy
+            -1.0
 
         """
 
