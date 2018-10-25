@@ -49,7 +49,7 @@ ext_modules = [
     )
 ]
 
-install_requires = ['numpy>=1.14', 'dimod>=0.7']
+install_requires = ['numpy>=1.14', 'dimod>=0.7.9']
 
 extras_require = {
     'test': ['coverage'],

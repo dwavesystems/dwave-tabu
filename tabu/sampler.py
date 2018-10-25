@@ -33,11 +33,11 @@ class TabuSampler(dimod.Sampler):
         This example solves a two-variable Ising model.
 
         >>> from tabu import TabuSampler
-        >>> response = TabuSampler().sample_ising({'a': -0.5, 'b': 1.0}, {('a', 'b'): -1})
-        >>> list(response.data()) # doctest: +SKIP
+        >>> samples = TabuSampler().sample_ising({'a': -0.5, 'b': 1.0}, {'ab': -1})
+        >>> list(samples.data()) # doctest: +SKIP
         [Sample(sample={'a': -1, 'b': -1}, energy=-1.5, num_occurrences=1)]
-        >>> response.data_vectors['energy']
-        array([-1.5])
+        >>> samples.first.energy
+        -1.5
 
     """
 
@@ -58,7 +58,7 @@ class TabuSampler(dimod.Sampler):
         Args:
             bqm (:obj:`~dimod.BinaryQuadraticModel`):
                 The binary quadratic model (BQM) to be sampled.
-            init_solution (:obj:`~dimod.Response`, optional):
+            init_solution (:obj:`~dimod.SampleSet`, optional):
                 Single sample that sets an initial state for all the problem variables.
                 Default is a random initial state.
             tenure (int, optional):
@@ -76,7 +76,7 @@ class TabuSampler(dimod.Sampler):
                 generates a sample.
 
         Returns:
-            :obj:`~dimod.Response`: A `dimod` :obj:`.~dimod.Response` object.
+            :obj:`~dimod.SampleSet`: A `dimod` :obj:`.~dimod.SampleSet` object.
 
         Examples:
             This example provides samples for a two-variable QUBO model.
@@ -85,18 +85,18 @@ class TabuSampler(dimod.Sampler):
             >>> import dimod
             >>> sampler = TabuSampler()
             >>> Q = {(0, 0): -1, (1, 1): -1, (0, 1): 2}
-            >>> bqm = dimod.BinaryQuadraticModel.from_qubo(Q, offset = 0.0)
-            >>> response = sampler.sample(bqm)
-            >>> response.data_vectors['energy']
-            array([-1.])
+            >>> bqm = dimod.BinaryQuadraticModel.from_qubo(Q, offset=0.0)
+            >>> samples = sampler.sample(bqm)
+            >>> samples.record[0].energy
+            -1.0
 
         """
 
         # input checking and defaults calculation
         # TODO: one "read" per sample in init_solution sampleset
         if init_solution is not None:
-            if not isinstance(init_solution, dimod.Response):
-                raise TypeError("'init_solution' should be a 'dimod.Response' instance")
+            if not isinstance(init_solution, dimod.SampleSet):
+                raise TypeError("'init_solution' should be a 'dimod.SampleSet' instance")
             if len(init_solution.record) < 1:
                 raise ValueError("'init_solution' should contain at least one sample")
             if len(init_solution.record[0].sample) != len(bqm):
@@ -107,7 +107,7 @@ class TabuSampler(dimod.Sampler):
             init_sample = None
 
         if not bqm:
-            return dimod.Response.from_samples([], {'energy': []}, info={}, vartype=bqm.vartype)
+            return dimod.SampleSet.from_samples([], energy=0, vartype=bqm.vartype)
 
         if tenure is None:
             tenure = int(max(min(20, len(bqm) / 4), 1))
@@ -135,8 +135,8 @@ class TabuSampler(dimod.Sampler):
             samples.append(sample)
             energies.append(energy)
 
-        response = dimod.Response.from_samples(
-            samples, {'energy': energies}, info={}, vartype=dimod.BINARY)
+        response = dimod.SampleSet.from_samples(
+            samples, energy=energies, vartype=dimod.BINARY)
         response.change_vartype(bqm.vartype, inplace=True)
         return response
 
