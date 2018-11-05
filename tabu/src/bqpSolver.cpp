@@ -530,8 +530,3 @@ long bqpSolver_restrictedLocalSearch(BQP *bqp, int *starting, int *restricted) {
     bqpSolver_restrictedLocalSearchInternal(bqp, starting, restricted, bqpUtil_getObjective(bqp, starting), changeInObjective);
     return bqp->solutionQuality;
 }
-
-
-
-
-

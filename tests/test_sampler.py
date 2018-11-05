@@ -45,16 +45,16 @@ class TestTabuSampler(unittest.TestCase):
     def test_disconnected_problem(self):
         h = {}
         J = {
-                # K_3
-                (0, 1): -1,
-                (1, 2): -1,
-                (0, 2): -1,
+            # K_3
+            (0, 1): -1,
+            (1, 2): -1,
+            (0, 2): -1,
 
-                # disonnected K_3
-                (3, 4): -1,
-                (4, 5): -1,
-                (3, 5): -1,
-                }
+            # disonnected K_3
+            (3, 4): -1,
+            (4, 5): -1,
+            (3, 5): -1,
+        }
 
         bqm = dimod.BinaryQuadraticModel.from_ising(h, J)
         resp = tabu.TabuSampler().sample(bqm)

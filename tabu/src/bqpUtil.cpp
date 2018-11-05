@@ -43,78 +43,6 @@ void bqpUtil_convertBQPToUpperTriangular(BQP *bqp) {
     }
 }
 
-// void bqpUtil_readMatrixTypeBQPFile(BQP *bqp, char* fileName) {
-//     int i, junk;
-//     char line[1000];
-//     int row = 0, col = 0;
-//
-//     FILE *fptr = fopen(fileName, "r");
-//     if(fptr == NULL) {
-//         printf("ERROR openning file");
-//         return;
-//     }
-//     fgets(line, 1000, fptr);
-//     fscanf(fptr, "  %d %d", &(bqp->nVars), &junk);
-//     bqp->Q = (long **)malloc(sizeof(long *) * bqp->nVars);
-//     bqp->solution = (int *)malloc(sizeof(int) * bqp->nVars);
-//     for(i = 0; i < bqp->nVars; i++) {
-//       bqp->Q[i] = (long *)malloc(sizeof(long) * bqp->nVars);
-//         bqp->solution[i] = 0;
-//     }
-//     bqp->solutionQuality = 0;
-//     bqp->nIterations = 1;
-//
-//     while(!feof(fptr)) {
-//       fscanf(fptr, "%ld", &(bqp->Q[row][col]));
-//         col++;
-//       if(col >= bqp->nVars) {
-//         col = 0;
-//         row++;
-//       }
-//       if(row >= bqp->nVars) {
-//         break;
-//       }
-//     }
-//     fclose(fptr);
-// }
-
-// void bqpUtil_readListTypeBQPFile(BQP *bqp, char* fileName) {
-//     int i, j, numOfProblems, numCoeffs, id1, id2, coeff;
-//     char line[1000];
-//     FILE *fptr = fopen(fileName, "r");
-//     if(fptr == NULL) {
-//         printf("ERROR openning file");
-//         return;
-//     }
-//     fgets(line, 1000, fptr);
-//     sscanf(line, " %d", &numOfProblems);
-//     if(numOfProblems < 1) {
-//         fclose(fptr);
-//         return;
-//     }
-//     fgets(line, 1000, fptr);
-//     sscanf(line, "  %d %d", &(bqp->nVars), &numCoeffs);
-//     bqp->Q = (long **)malloc(sizeof(long *) * bqp->nVars);
-//     bqp->solution = (int *)malloc(sizeof(int) * bqp->nVars);
-//     for(i = 0; i < bqp->nVars; i++) {
-//       bqp->Q[i] = (long *)malloc(sizeof(long) * bqp->nVars);
-//         bqp->solution[i] = 0;
-//         for(j = 0; j < bqp->nVars; j++) {
-//             bqp->Q[i][j] = 0;
-//         }
-//     }
-//     bqp->solutionQuality = 0;
-//     bqp->nIterations = 1;
-//
-//     for(i = 0; i < numCoeffs && !feof(fptr); i++) {
-//         fgets(line, 1000, fptr);
-//         sscanf(line, " %d %d %d", &id1, &id2, &coeff);
-//         bqp->Q[id1 - 1][id2 - 1] = -coeff;
-//         bqp->Q[id2 - 1][id1 - 1] = -coeff;
-//     }
-//     fclose(fptr);
-// }
-
 void bqpUtil_print(BQP *bqp) {
     int i, j;
     printf("BQP: Number of variables: %d\nCoefficient matrix:\n", bqp->nVars);
@@ -131,12 +59,12 @@ void bqpUtil_print(BQP *bqp) {
 
 long bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit) {
     int i;
-    long change = 0;
+    long change = 0, inc;
     change += (oldSolution[flippedBit] == 1)? (-1 * bqp->Q[flippedBit][flippedBit]) : bqp->Q[flippedBit][flippedBit];
     for(i = bqp->nVars; i--;) {
         if(!(oldSolution[i] ^ 1) && i ^ flippedBit) {
-            change += (oldSolution[flippedBit] ^ 1)? (bqp->Q[flippedBit][i] + bqp->Q[i][flippedBit]) :
-                                                                                                    -(bqp->Q[flippedBit][i] + bqp->Q[i][flippedBit]);
+            inc = bqp->Q[flippedBit][i] + bqp->Q[i][flippedBit];
+            change += (oldSolution[flippedBit] ^ 1) ?  inc : -inc;
         }
     }
     return change;
@@ -176,38 +104,6 @@ long bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, 
     return cost;
 }
 
-// void bqpUtil_getRandomBQP(BQP *bqp, int nVars, long maxCoeff) {
-//     int i, j;
-//     if(bqp == NULL) {
-//         bqp = (BQP *)malloc(sizeof(BQP));
-//     }
-//     bqp->Q = (long **)malloc(sizeof(long *) * nVars);
-//     for(i = 0; i < nVars; i++) {
-//         bqp->Q[i] = (long *)malloc(sizeof(long) * nVars);
-//     }
-//     bqp->solution = (int *)malloc(sizeof(int) * nVars);
-//     for(i = 0; i < nVars; i++) {
-//         for(j = i; j < nVars; j++) {
-//             bqp->Q[i][j] = 0;
-//             if(rand() < RAND_MAX / 2.0) {
-//                 bqp->Q[i][j] = (long)(rand() % maxCoeff);
-//             }
-//             if(rand() < RAND_MAX / 2.0) {
-//                 bqp->Q[i][j] = -bqp->Q[i][j];
-//             }
-//             bqp->Q[j][i] = bqp->Q[i][j];
-//         }
-//         bqp->solution[i] = 0;
-//     }
-//     bqp->nVars = nVars;
-//     bqp->solutionQuality = 0;
-//     bqp->nIterations = 0;
-//     /*added to record more statistics.*/
-//     bqp->restartNum = 0;
-//     bqp->iterNum = 0;
-//     bqp->evalNum = 0;
-// }
-
 void bqpUtil_initBQPSolution(BQP *bqp, const int *initSolution) {
     int i;
 
@@ -245,6 +141,3 @@ void bqpUtil_printSolution(BQP *bqp) {
     }
     printf("\n");
 }
-
-
-

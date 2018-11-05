@@ -62,26 +62,6 @@ long bqpUtil_getMaxBQPCoeff(BQP *bqp);
 void bqpUtil_convertBQPToUpperTriangular(BQP *bqp);
 
 /**
- * Read BQP from file. The file must be in matrix format, that is
- * it must contain the whole BQP matrix unlike the other format in
- * which, only the non-zero entries of the matrix are specified
- * @param bqp: The BQP read fromt he file
- * @param fileName: BQP file name
- * @return void
- */
-void bqpUtil_readMatrixTypeBQPFile(BQP *bqp, char* fileName);
-
-/**
- * Read BQP from file. The file nust be in list format, that is
- * it must contain only the non-zero entries of the BQP matrix
- * unlike the other format in which the complete matrix is specified
- * @param bqp: The BQP read fromt he file
- * @param fileName: BQP file name
- * @return void
- */
-void bqpUtil_readListTypeBQPFile(BQP *bqp, char* fileName);
-
-/**
  * Print a BQP
  * @param bqp: BQP to be printed
  * @return void
@@ -119,15 +99,6 @@ long bqpUtil_getObjective(BQP *bqp, int * solution);
  * @return value ot objective function at new solution
  */
 long bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, long oldCost);
-
-/**
- * Generates a random BQP.
- * @param bqp: the BQP generated
- * @param nVars: number of variables
- * @param maxCoeff: all entries in the Q matrix will be between 0 and maxCoeff
- * @return void
- */
-void bqpUtil_getRandomBQP(BQP *bqp, int nVars, long maxCoeff);
 
 /**
  * Initialize the current solution in a BQP to all zeros
