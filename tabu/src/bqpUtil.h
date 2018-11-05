@@ -1,18 +1,17 @@
-// Copyright 2018 D-Wave Systems Inc.
+//  Copyright 2018 D-Wave Systems Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// ===========================================================================
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
 #ifndef _BQPUTIL_H_
 
 #define _BQPUTIL_H_
@@ -62,26 +61,6 @@ long bqpUtil_getMaxBQPCoeff(BQP *bqp);
 void bqpUtil_convertBQPToUpperTriangular(BQP *bqp);
 
 /**
- * Read BQP from file. The file must be in matrix format, that is
- * it must contain the whole BQP matrix unlike the other format in
- * which, only the non-zero entries of the matrix are specified
- * @param bqp: The BQP read fromt he file
- * @param fileName: BQP file name
- * @return void
- */
-void bqpUtil_readMatrixTypeBQPFile(BQP *bqp, char* fileName);
-
-/**
- * Read BQP from file. The file nust be in list format, that is
- * it must contain only the non-zero entries of the BQP matrix
- * unlike the other format in which the complete matrix is specified
- * @param bqp: The BQP read fromt he file
- * @param fileName: BQP file name
- * @return void
- */
-void bqpUtil_readListTypeBQPFile(BQP *bqp, char* fileName);
-
-/**
  * Print a BQP
  * @param bqp: BQP to be printed
  * @return void
@@ -119,15 +98,6 @@ long bqpUtil_getObjective(BQP *bqp, int * solution);
  * @return value ot objective function at new solution
  */
 long bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, long oldCost);
-
-/**
- * Generates a random BQP.
- * @param bqp: the BQP generated
- * @param nVars: number of variables
- * @param maxCoeff: all entries in the Q matrix will be between 0 and maxCoeff
- * @return void
- */
-void bqpUtil_getRandomBQP(BQP *bqp, int nVars, long maxCoeff);
 
 /**
  * Initialize the current solution in a BQP to all zeros
