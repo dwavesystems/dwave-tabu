@@ -35,12 +35,20 @@ Documentation
   license
 
 .. toctree::
-  :caption: D-Wave's Ocean Software
+  :caption: Ocean Software
+  :maxdepth: 1
+
+  ocean
+  contributing
+  glossary
+
+.. toctree::
+  :caption: D-Wave
   :maxdepth: 1
 
   dwave
-  ocean
-  contributing
+  leap
+  sysdocs
 
 Indices and tables
 ------------------
