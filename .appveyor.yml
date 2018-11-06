@@ -1,3 +1,5 @@
+image: Visual Studio 2015
+
 environment:
 
   # PyPI login
@@ -5,10 +7,8 @@ environment:
   password:
     secure: 9/YAQhmz9Kb1ZeXzhBYeQA==
 
+  # https://www.appveyor.com/docs/build-environment/#python
   matrix:
-
-    # https://www.appveyor.com/docs/build-environment/#python
-
     - PYTHON: "C:\\Python27"
     - PYTHON: "C:\\Python27-x64"
     - PYTHON: "C:\\Python34"
@@ -23,10 +23,10 @@ environment:
 install:
   - "%PYTHON%\\python.exe --version"
   - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
-  - choco install -y --no-progress --allow-empty-checksums -r swig --version 3.0.9
+  - choco install -y --no-progress -r swig --version 3.0.12
 
   # for python34-x64
-  - echo "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 > "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64/vcvars64.bat"
+  #- echo "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 > "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64/vcvars64.bat"
 
 build_script:
   - "%PYTHON%\\python.exe setup.py build_ext --inplace"
