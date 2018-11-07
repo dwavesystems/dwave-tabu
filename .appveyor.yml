@@ -11,8 +11,10 @@ environment:
   matrix:
     - PYTHON: "C:\\Python27"
     - PYTHON: "C:\\Python27-x64"
+      DISTUTILS_USE_SDK: "1"
     - PYTHON: "C:\\Python34"
     - PYTHON: "C:\\Python34-x64"
+      DISTUTILS_USE_SDK: "1"
     - PYTHON: "C:\\Python35"
     - PYTHON: "C:\\Python35-x64"
     - PYTHON: "C:\\Python36"
@@ -25,11 +27,10 @@ install:
   - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
   - choco install -y --no-progress -r swig --version 3.0.12
 
-  # for python27-x64
-  - echo "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 > "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\bin\amd64/vcvars64.bat"
-
-  # for python34-x64
-  - echo "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 > "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64/vcvars64.bat"
+# support python27-x64 and python34-x64
+# (https://packaging.python.org/guides/supporting-windows-using-appveyor)
+before_build:
+  - IF "%DISTUTILS_USE_SDK%"=="1" CALL "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 /release
 
 build_script:
   - "%PYTHON%\\python.exe setup.py build_ext --inplace"
