@@ -14,7 +14,7 @@
 
 import os
 from io import open
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 
 # Load package info, without importing the package
