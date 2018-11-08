@@ -451,7 +451,7 @@ int bqpSolver_naiveSearch(BQP *bqp) {
         prevSolution[i] = 0;
         bqp->solution[i] = 0;
     }
-    bqp->nIterations = (long)pow(2, bqp->nVars);
+    bqp->nIterations = (long)pow(2.0, bqp->nVars);
     prevCost = 0;
     minCost = 0;
     for(num = 1; num < bqp->nIterations; num++) {
