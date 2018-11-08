@@ -1,5 +1,6 @@
 env/
 build/
+dist/
 *.pyc
 __pycache__/
 
