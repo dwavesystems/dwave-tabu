@@ -56,13 +56,13 @@ TabuSearch::TabuSearch(vector<vector< double > > Q, vector<int> initSol, int ten
     }
     bqp.solution.resize(nvars);
     bqp.solutionQuality = 0;
-    bqpSolver_multiStartTabooSearch(&bqp, timeout, 1000000, tenure, initSol.data(), NULL);
+    bqpSolver_multiStartTabooSearch(&bqp, timeout, 1000000, tenure, vector_data<int>(initSol), NULL);
 }
 
 
 double TabuSearch::bestEnergy()
 {
-    return (double)bqpUtil_getObjective(&bqp, bqp.solution.data()) / sf;
+    return (double)bqpUtil_getObjective(&bqp, vector_data<int>(bqp.solution)) / sf;
 }
 
 vector<int> TabuSearch::bestSolution()

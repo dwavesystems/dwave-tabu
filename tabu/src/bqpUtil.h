@@ -127,5 +127,11 @@ void bqpUtil_free(BQP *bqp);
  */
 void bqpUtil_printSolution(BQP *bqp);
 
+// replacement for vector.data() in ancient compilers not supporting it (VS2008, aka VS9)
+// NB: we need to support VS9 is we want to build for python2.7 on windows
+template<typename T>
+T* vector_data(std::vector<T>& v) {
+    return v.size() ? &v[0] : NULL;
+}
 
 #endif
