@@ -73,7 +73,7 @@ long bqpUtil_getObjective(BQP *bqp, int * solution) {
     int i;
     long cost = 0;
     vector<int> u_zeroSol(bqp->nVars);
-    int *zeroSolution = u_zeroSol.data();
+    int *zeroSolution = vector_data<int>(u_zeroSol);
     for(i = bqp->nVars; i--;) {
         zeroSolution[i] = 0;
     }
@@ -90,7 +90,7 @@ long bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, 
     int i;
     long cost = oldCost;
     vector<int> u_old(bqp->nVars);
-    int *oldSolCopy = u_old.data();
+    int *oldSolCopy = vector_data<int>(u_old);
     for(i = 0; i < bqp->nVars; i++) {
         oldSolCopy[i] = oldSolution[i];
     }
@@ -111,9 +111,9 @@ void bqpUtil_initBQPSolution(BQP *bqp, const int *initSolution) {
           bqp->solution[i] = 0;
       }
     } else {
-      memcpy(bqp->solution.data(), initSolution, bqp->nVars * sizeof(int));
+      memcpy(vector_data<int>(bqp->solution), initSolution, bqp->nVars * sizeof(int));
     }
-    bqp->solutionQuality = bqpUtil_getObjective(bqp, bqp->solution.data());
+    bqp->solutionQuality = bqpUtil_getObjective(bqp, vector_data<int>(bqp->solution));
     bqp->nIterations = 1;
 }
 
@@ -128,12 +128,12 @@ void bqpUtil_randomizeBQPSolution(BQP *bqp) {
         }
     }
     bqp->nIterations = 1;
-    bqp->solutionQuality = bqpUtil_getObjective(bqp, bqp->solution.data());
+    bqp->solutionQuality = bqpUtil_getObjective(bqp, vector_data<int>(bqp->solution));
 }
 
 void bqpUtil_printSolution(BQP *bqp) {
     int i;
-    printf("Objective function value: %ld\n", bqpUtil_getObjective(bqp, bqp->solution.data()));
+    printf("Objective function value: %ld\n", bqpUtil_getObjective(bqp, vector_data<int>(bqp->solution)));
     printf("Variable assignment:\n");
     for(i = 0; i < bqp->nVars; i++) {
         printf("%d ", bqp->solution[i]);
