@@ -16,7 +16,7 @@ Installation or Building
 
 .. installation-start-marker
 
-Install from a wheel on PyPI:
+Install from a wheel on PyPI::
 
     pip install dwave-tabu
 
