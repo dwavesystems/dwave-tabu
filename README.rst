@@ -16,16 +16,17 @@ Installation or Building
 
 .. installation-start-marker
 
-**Package not yet available on PyPI.** Install in developer (edit) mode::
+Install from a wheel on PyPI:
 
-    pip install -e git+https://github.com/dwavesystems/dwave-tabu.git#egg=dwave-tabu
+    pip install dwave-tabu
 
 Alternatively, you can build the library with setuptools. This build requires that
-your system has a C compiler toolchain installed.
+your system has a C++ compiler toolchain installed, as well as `SWIG <http://www.swig.org/>`_.
 
 .. code-block:: bash
 
     pip install -r requirements.txt
+    python setup.py build_ext --inplace
     python setup.py install
 
 .. installation-end-marker
