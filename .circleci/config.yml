@@ -225,15 +225,20 @@ jobs:
       - checkout
 
       - run:
-          name: install swig
+          name: install swig from source
           command: |
-            yum install -y swig
+            # on manylinux (CentOS 5), latest yum swig does not support Python 3
+            # install it from source
+            export BUILD_PREFIX="${BUILD_PREFIX:-/usr/local}"
+            . .circleci/utils.sh
+            install_swig
+            # make available downstream, check version
+            export PATH="$BUILD_PREFIX/bin:$PATH"
+            swig -version
 
       - run:
           name: build wheels
           command: |
-            # ancient SWIG generates non-conformant cpp code sometimes
-            export CFLAGS='-fpermissive'
             for PYBIN in /opt/python/*/bin; do
               "${PYBIN}/pip" install -r requirements.txt
               "${PYBIN}/pip" wheel . -w ./wheelhouse
