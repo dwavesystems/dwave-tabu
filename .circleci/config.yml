@@ -227,7 +227,7 @@ jobs:
       - run:
           name: install swig
           command: |
-            sudo yum install swig
+            yum install -y swig
 
       - run:
           name: build wheels
