@@ -225,6 +225,11 @@ jobs:
       - checkout
 
       - run:
+          name: install swig
+          command: |
+            sudo yum install swig
+
+      - run:
           name: build wheels
           command: |
             for PYBIN in /opt/python/*/bin; do
@@ -286,6 +291,11 @@ jobs:
           name: install pyenv
           command: |
             brew install pyenv
+
+      - run:
+          name: install swig
+          command: |
+            brew install swig
 
       - restore_cache:
           keys:
