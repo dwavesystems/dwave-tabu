@@ -226,7 +226,8 @@ jobs:
 
       - run:
           name: install swig
-          command: sudo yum install swig
+          command: |
+            sudo yum install swig
 
       - run:
           name: build wheels
@@ -290,6 +291,11 @@ jobs:
           name: install pyenv
           command: |
             brew install pyenv
+
+      - run:
+          name: install swig
+          command: |
+            brew install swig
 
       - restore_cache:
           keys:
