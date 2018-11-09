@@ -232,6 +232,8 @@ jobs:
       - run:
           name: build wheels
           command: |
+            # ancient SWIG generates non-conformant cpp code sometimes
+            export CFLAGS='-fpermissive'
             for PYBIN in /opt/python/*/bin; do
               "${PYBIN}/pip" install -r requirements.txt
               "${PYBIN}/pip" wheel . -w ./wheelhouse
