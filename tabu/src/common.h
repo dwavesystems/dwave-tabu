@@ -33,4 +33,4 @@ class Exception: public std::exception
         std::string error_msg;
 };
 
-#endif // __COMMON_H__
+#endif

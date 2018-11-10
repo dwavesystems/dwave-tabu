@@ -225,9 +225,16 @@ jobs:
       - checkout
 
       - run:
-          name: install swig
+          name: install swig from source
           command: |
-            sudo yum install swig
+            # on manylinux (CentOS 5), latest yum swig does not support Python 3
+            # install it from source
+            export BUILD_PREFIX="${BUILD_PREFIX:-/usr/local}"
+            . .circleci/utils.sh
+            install_swig
+            # make available downstream, check version
+            export PATH="$BUILD_PREFIX/bin:$PATH"
+            swig -version
 
       - run:
           name: build wheels
@@ -251,9 +258,9 @@ jobs:
       - run: &init-pypirc-template
           name: init .pypirc
           command: |
-            echo -e "[pypi]" >> ~/.pypirc
-            echo -e "username = $PYPI_USERNAME" >> ~/.pypirc
-            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+            echo "[pypi]" > ~/.pypirc
+            echo "username = $PYPI_USERNAME" >> ~/.pypirc
+            echo "password = $PYPI_PASSWORD" >> ~/.pypirc
 
       - run:
           name: create a virtualenv

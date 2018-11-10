@@ -31,5 +31,4 @@ class TabuSearch
         int sf;
 };
 
-
-#endif //__TABU_SEARCH_H__
+#endif
