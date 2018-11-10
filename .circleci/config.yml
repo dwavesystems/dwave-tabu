@@ -241,7 +241,8 @@ jobs:
           command: |
             for PYBIN in /opt/python/*/bin; do
               "${PYBIN}/pip" install -r requirements.txt
-              "${PYBIN}/pip" wheel . -w ./wheelhouse
+              "${PYBIN}/python" setup.py build_ext --inplace
+              "${PYBIN}/python" setup.py bdist_wheel -d ./wheelhouse
               "${PYBIN}/python" setup.py sdist -d ./dist
             done
 
@@ -334,6 +335,7 @@ jobs:
           name: create bdist_wheel
           command: |
             . env/bin/activate
+            python setup.py build_ext --inplace
             python setup.py bdist_wheel
 
       - store_artifacts:
