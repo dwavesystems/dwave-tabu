@@ -12,5 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+__all__ = ['TabuSearch', 'TabuSampler']
+
 from tabu.tabu_search import TabuSearch
 from tabu.sampler import TabuSampler

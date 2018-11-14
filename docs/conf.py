@@ -15,6 +15,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+from io import open
 import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
@@ -52,14 +53,25 @@ source_parsers = {'.md': 'recommonmark.parser.CommonMarkParser'}
 # The master toctree document.
 master_doc = 'index'
 
+# Mock the C++ extension
+autodoc_mock_imports = ["tabu.tabu_search"]
+
+# Load package info, without importing the package
+basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+package_info_path = os.path.join(basedir, "tabu", "package_info.py")
+package_info = {}
+try:
+    with open(package_info_path, encoding='utf-8') as f:
+        exec(f.read(), package_info)
+except SyntaxError:
+    execfile(package_info_path, package_info)
+
 # General information about the project.
-# General information about the project.
-from tabu import package_info
-project = package_info.__title__
-copyright = package_info.__copyright__
-author = package_info.__author__
-version = package_info.__version__
-release = package_info.__version__
+project = package_info['__title__']
+copyright = package_info['__copyright__']
+author = package_info['__author__']
+version = package_info['__version__']
+release = package_info['__version__']
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -108,84 +120,6 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
 
-# -- Options for HTMLHelp output ------------------------------------------
-
-# Output file base name for HTML help builder.
-#htmlhelp_basename = 'dwave-tabu_doc'
-
-
-# -- Options for LaTeX output ---------------------------------------------
-
-#latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
-    # 'papersize': 'letterpaper',
-
-    # The font size ('10pt', '11pt' or '12pt').
-    #
-    # 'pointsize': '10pt',
-
-    # Additional stuff for the LaTeX preamble.
-    #
-    # 'preamble': '',
-
-    # Latex figure (float) alignment
-    #
-    # 'figure_align': 'htbp',
-#}
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-#latex_documents = [
-#    (master_doc, 'tabu.tex', u'tabu Documentation',
-#     u'D-Wave Systems Inc', 'manual'),
-#]
-
-
-# -- Options for manual page output ---------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-#man_pages = [
-#    (master_doc, 'tabu', u'tabu Documentation',
-#     [author], 1)
-#]
-
-
-# -- Options for Texinfo output -------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-#texinfo_documents = [
-#    (master_doc, 'tabu', u'tabu Documentation',
-#     author, 'tabu', 'One line description of project.',
-#     'Miscellaneous'),
-#]
-
-
-# -- Options for Epub output ----------------------------------------------
-
-# Bibliographic Dublin Core info.
-#epub_title = project
-#epub_author = author
-#epub_publisher = author
-#epub_copyright = copyright
-
-# The unique identifier of the text. This can be a ISBN number
-# or the project homepage.
-#
-# epub_identifier = ''
-
-# A unique identification for the text.
-#
-# epub_uid = ''
-
-# A list of files that should not be packed into the epub file.
-#epub_exclude_files = ['search.html']
-
-
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
@@ -199,4 +133,5 @@ intersphinx_mapping = {
     'minorminer': ('https://docs.ocean.dwavesys.com/projects/minorminer/en/latest/', None),
     'qbsolv': ('https://docs.ocean.dwavesys.com/projects/qbsolv/en/latest/', None),
     'oceandocs': ('https://docs.ocean.dwavesys.com/en/latest/', None),
-    'sysdocs_gettingstarted': ('https://docs.dwavesys.com/docs/latest/', None)}
+    'sysdocs_gettingstarted': ('https://docs.dwavesys.com/docs/latest/', None),
+}
