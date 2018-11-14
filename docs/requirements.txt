@@ -2,3 +2,6 @@
 sphinx
 sphinx_rtd_theme
 recommonmark
+
+# install dwave-tabu from wheel (otherwise RtD requires SWIG and c++ toolchain)
+dwave-tabu
