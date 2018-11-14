@@ -52,14 +52,25 @@ source_parsers = {'.md': 'recommonmark.parser.CommonMarkParser'}
 # The master toctree document.
 master_doc = 'index'
 
+# Mock the C++ extension
+autodoc_mock_imports = ["tabu.tabu_search"]
+
+# Load package info, without importing the package
+basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+package_info_path = os.path.join(basedir, "tabu", "package_info.py")
+package_info = {}
+try:
+    with open(package_info_path, encoding='utf-8') as f:
+        exec(f.read(), package_info)
+except SyntaxError:
+    execfile(package_info_path, package_info)
+
 # General information about the project.
-# General information about the project.
-from tabu import package_info
-project = package_info.__title__
-copyright = package_info.__copyright__
-author = package_info.__author__
-version = package_info.__version__
-release = package_info.__version__
+project = package_info['__title__']
+copyright = package_info['__copyright__']
+author = package_info['__author__']
+version = package_info['__version__']
+release = package_info['__version__']
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
