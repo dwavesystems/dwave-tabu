@@ -1,3 +1,19 @@
+.. image:: https://badge.fury.io/py/dwave-tabu.svg
+    :target: https://badge.fury.io/py/dwave-tabu
+    :alt: Last version on PyPI
+
+.. image:: https://circleci.com/gh/dwavesystems/dwave-tabu.svg?style=svg
+    :target: https://circleci.com/gh/dwavesystems/dwave-tabu
+    :alt: Linux/Mac build status
+
+.. image:: https://ci.appveyor.com/api/projects/status/79notdhalmnbbh1v/branch/master?svg=true
+    :target: https://ci.appveyor.com/project/dwave-adtt/dwave-tabu/branch/master
+    :alt: Windows build status
+
+.. image:: https://readthedocs.com/projects/d-wave-systems-dwave-tabu/badge/?version=latest
+    :target: https://docs.ocean.dwavesys.com/projects/d-wave-systems-dwave-tabu/en/latest/?badge=latest
+    :alt: Documentation Status
+
 ==========
 dwave-tabu
 ==========
