@@ -14,6 +14,8 @@
 
 """A dimod sampler_ that uses the MST2 multistart tabu search algorithm."""
 
+from __future__ import division
+
 import random
 
 import numpy
@@ -106,11 +108,11 @@ class TabuSampler(dimod.Sampler):
             return dimod.SampleSet.from_samples([], energy=0, vartype=bqm.vartype)
 
         if tenure is None:
-            tenure = int(max(min(20, len(bqm) / 4), 1))
+            tenure = max(min(20, len(bqm) // 4), 0)
         if not isinstance(tenure, int):
-            raise TypeError("'tenure' should be an integer in range [1, num_vars - 1]")
-        if not 0 < tenure < len(bqm):
-            raise ValueError("'tenure' should be an integer in range [1, num_vars - 1]")
+            raise TypeError("'tenure' should be an integer in range [0, num_vars - 1]")
+        if not 0 <= tenure < len(bqm):
+            raise ValueError("'tenure' should be an integer in range [0, num_vars - 1]")
 
         if not isinstance(num_reads, int):
             raise TypeError("'num_reads' should be a positive integer")

@@ -73,6 +73,12 @@ class TestTabuSampler(unittest.TestCase):
         resp = tabu.TabuSampler().sample_ising({}, {})
         dimod.testing.assert_response_energies(resp, dimod.BinaryQuadraticModel.empty(dimod.SPIN))
 
+    def test_single_variable_problem(self):
+        bqm = dimod.BinaryQuadraticModel({'a': 1}, {}, 0.0, dimod.SPIN)
+        resp = tabu.TabuSampler().sample(bqm)
+        dimod.testing.assert_response_energies(resp, bqm)
+        self.assertEqual(resp.first.energy, -1)
+
     def test_linear_problem(self):
         bqm = dimod.BinaryQuadraticModel.from_ising({v: -1 for v in range(100)}, {})
         resp = tabu.TabuSampler().sample(bqm)
