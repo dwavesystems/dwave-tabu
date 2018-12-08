@@ -34,8 +34,8 @@ TabuSearch::TabuSearch(vector<vector< double > > Q, vector<int> initSol, int ten
     if (initSol.size() != nvars)
         throw Exception("length of init_solution doesn't match the size of Q");
 
-    if (tenure < 1 || tenure > (nvars - 1))
-        throw Exception("tenure must be in the range [1, num_vars - 1]");
+    if (tenure < 0 || tenure > (nvars - 1))
+        throw Exception("tenure must be in the range [0, num_vars - 1]");
 
     bqp.evalNum = 0;
     bqp.iterNum = 0;
