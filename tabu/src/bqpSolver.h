@@ -35,7 +35,7 @@ typedef struct bqpSolver_Callback {
 } bqpSolver_Callback;
 
 /**
- * Solves a BQP using simple taboo search heuristic
+ * Solves a BQP using simple tabu search heuristic
  * \param bqp: BQP problem to be solved
  * \param starting: A starting solution
  * \param ZCoeff: A parameter that defines the number of iterations
@@ -68,7 +68,7 @@ long bqpSolver_localSearch(BQP *bqp, int *starting);
  * Selects variables to change and build up new solution
  * \param bqp: BQP problem to be solved
  * \param n: number of variables required to be selected
- * \param C: C matrix (refer paper for multi start taboo search by Paulubekis)
+ * \param C: C matrix (refer paper for multi start tabu search by Palubeckis)
  * \param I: storage for selected variables
  * \return 
  */
@@ -79,7 +79,7 @@ void bqpSolver_selectVariables(BQP *bqp, int n, long **C, int *I);
  * Uses steepest ascent to construct a new solution
  * \param solution: Old solution
  * \param bqp: BQP problem to be solved
- * \param C: C matrix (refer paper for multi start taboo search by Paulubekis)
+ * \param C: C matrix (refer paper for multi start tabu search by Palubeckis)
  * \param I: selected variables
  * \param n: number of variables required to be selected
  * \return 
@@ -87,7 +87,7 @@ void bqpSolver_selectVariables(BQP *bqp, int n, long **C, int *I);
 void bqpSolver_steepestAscent(int *solution, BQP *bqp, long **C, int *I, int n);
 
 /**
- * Compute the C matrix (refer to the taboo search heuristic in the paper by palubekis
+ * Compute the C matrix (refer to the tabu search heuristic in the paper by Palubeckis
  * \param C: the matrix computed
  * \param bqp: the BQP
  * \param solution: current solution
@@ -96,7 +96,7 @@ void bqpSolver_steepestAscent(int *solution, BQP *bqp, long **C, int *I, int n);
 void bqpSolver_computeC(long **C, BQP *bqp, int *solution);
 
 /**
- * Simple taboo search solver with multi starts
+ * Simple tabu search solver with multi starts
  * \param bqp: BQP problem to be solved
  * \param timLimitInMilliSecs: time limit in milli seconds
  * \param numStarts: number of re starts
