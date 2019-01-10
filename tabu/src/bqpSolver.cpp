@@ -191,7 +191,7 @@ void bqpSolver_selectVariables(BQP *bqp, int n, vector< vector<double> > &C, vec
     }
     for(ctr = 0; ctr < n; ctr++) {
         dmin = std::numeric_limits<double>::max();
-        dmax = std::numeric_limits<double>::lowest();
+        dmax = -std::numeric_limits<double>::max();
         for(i = 0; i < bqp->nVars; i++) {
             if(selected[i] == 1) {
                 continue;
@@ -298,8 +298,8 @@ void bqpSolver_steepestAscent(vector<int> &solution, BQP *bqp, vector< vector<do
         h2[idI] = h2[idI] * 1;
     }
     for(ctr = 0; ctr < n; ctr++) {
-        V1 = std::numeric_limits<double>::lowest();
-        V2 = std::numeric_limits<double>::lowest();
+        V1 = -std::numeric_limits<double>::max();
+        V2 = -std::numeric_limits<double>::max();
         for(i = 0; i < n; i++) {
             idI = I[i];
             if(visited[idI] == 1) {
