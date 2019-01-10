@@ -44,13 +44,12 @@ class TabuSampler(dimod.Sampler):
 
     def __init__(self):
         self.parameters = {'tenure': [],
-                           'scale_factor': [],
                            'timeout': [],
                            'num_reads': [],
                            'init_solution': []}
         self.properties = {}
 
-    def sample(self, bqm, init_solution=None, tenure=None, scale_factor=1, timeout=20, num_reads=1):
+    def sample(self, bqm, init_solution=None, tenure=None, timeout=20, num_reads=1):
         """Run a tabu search on a given binary quadratic model.
 
         Args:
@@ -64,10 +63,6 @@ class TabuSampler(dimod.Sampler):
                 explored solutions kept in memory.
                 Default is a quarter of the number of problem variables up to
                 a maximum value of 20.
-            scale_factor (number, optional):
-                Scaling factor for linear and quadratic biases in the BQM. Internally, the BQM is
-                converted to a QUBO matrix, and elements are stored as long ints
-                using ``internal_q = long int (q * scale_factor)``.
             timeout (int, optional):
                 Total running time in milliseconds.
             num_reads (int, optional): Number of reads. Each run of the tabu algorithm
@@ -127,7 +122,7 @@ class TabuSampler(dimod.Sampler):
         for _ in range(num_reads):
             if init_sample is None:
                 init_sample = self._bqm_sample_to_tabu_sample(self._random_sample(bqm.binary), bqm.binary)
-            r = TabuSearch(qubo, init_sample, tenure, scale_factor, timeout)
+            r = TabuSearch(qubo, init_sample, tenure, timeout)
             sample = self._tabu_sample_to_bqm_sample(list(r.bestSolution()), bqm.binary)
             energy = bqm.binary.energy(sample)
             samples.append(sample)
