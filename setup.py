@@ -15,6 +15,7 @@
 import os
 from io import open
 from setuptools import setup, Extension
+from setuptools.command.build_ext import build_ext
 
 
 # Load package info, without importing the package
@@ -26,6 +27,22 @@ try:
         exec(f.read(), package_info)
 except SyntaxError:
     execfile(package_info_path, package_info)
+
+extra_compile_args = {
+    'msvc': ['/std:c++14'],
+    'unix': ['-std=c++11'],
+}
+
+
+class build_ext_compiler_check(build_ext):
+    def build_extensions(self):
+        compiler = self.compiler.compiler_type
+
+        compile_args = extra_compile_args[compiler]
+        for ext in self.extensions:
+            ext.extra_compile_args = compile_args
+
+        build_ext.build_extensions(self)
 
 
 packages = ['tabu']
@@ -64,6 +81,7 @@ setup(
     url=package_info['__url__'],
     license=package_info['__license__'],
     ext_modules=ext_modules,
+    cmdclass={'build_ext': build_ext_compiler_check},
     py_modules=py_modules,
     packages=packages,
     install_requires=install_requires,
