@@ -22,12 +22,12 @@ using std::size_t;
 
 TabuSearch::TabuSearch(vector<vector< double > > Q, vector<int> initSol, int tenure, long int timeout)
 {
-    size_t nvars = Q.size();
+    int nvars = Q.size();
     for (int i = 0; i < nvars; i++){
-        if (Q[i].size() != nvars)
+        if ((int)Q[i].size() != nvars)
             throw Exception("Q must be a symmetric square matrix");
     }
-    if (initSol.size() != nvars)
+    if ((int)initSol.size() != nvars)
         throw Exception("length of init_solution doesn't match the size of Q");
 
     if (tenure < 0 || tenure > (nvars - 1))

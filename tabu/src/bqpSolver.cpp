@@ -29,7 +29,7 @@ double bqpSolver_tabooSearch(
 ) {
     bqp->restartNum++;/*added to record more statistics.*/
     clock_t startTime = clock();
-    int i, k, j;
+    int i, k;
     int globalMinFound;
     long /*objectiveChangeCtr = 0,*/ localSearchCtr = 0;
     long long iter = 0;
@@ -138,7 +138,7 @@ double bqpSolver_tabooSearch(
 double bqpSolver_localSearchInternal(BQP *bqp, vector<int> &starting, double startingObjective, vector<double> &changeInObjective) {
     int i, j;
     long long iter = 0;
-    double objective, change;
+    double change;
     int improved;
     for(i = 0; i < bqp->nVars; i++) {
         bqp->solution[i] = starting[i];
@@ -184,7 +184,6 @@ void bqpSolver_selectVariables(BQP *bqp, int n, vector< vector<double> > &C, vec
     vector<double> e(bqp->nVars);
     vector<double> prob(bqp->nVars);
     double selectedProb, prevProb, sumE;
-    int allDsEqual;
     double dmin, dmax;
     for(i = 0; i < bqp->nVars; i++) {
         selected[i] = 0;
@@ -193,7 +192,6 @@ void bqpSolver_selectVariables(BQP *bqp, int n, vector< vector<double> > &C, vec
     for(ctr = 0; ctr < n; ctr++) {
         dmin = std::numeric_limits<double>::max();
         dmax = std::numeric_limits<double>::lowest();
-        allDsEqual = 1;
         for(i = 0; i < bqp->nVars; i++) {
             if(selected[i] == 1) {
                 continue;

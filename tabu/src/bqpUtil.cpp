@@ -49,7 +49,7 @@ void bqpUtil_print(BQP *bqp) {
     for(i = 0; i < bqp->nVars; i++) {
         printf("{");
         for(j = 0; j < bqp->nVars; j++) {
-            printf("%6ld,", bqp->Q[i][j]);
+            printf("%f,", bqp->Q[i][j]);
         }
         printf("},\n");
     }
@@ -123,7 +123,7 @@ void bqpUtil_randomizeBQPSolution(BQP *bqp) {
 
 void bqpUtil_printSolution(BQP *bqp) {
     int i;
-    printf("Objective function value: %ld\n", bqpUtil_getObjective(bqp, bqp->solution));
+    printf("Objective function value: %f\n", bqpUtil_getObjective(bqp, bqp->solution));
     printf("Variable assignment:\n");
     for(i = 0; i < bqp->nVars; i++) {
         printf("%d ", bqp->solution[i]);
