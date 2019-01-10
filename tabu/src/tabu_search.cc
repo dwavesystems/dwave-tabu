@@ -43,7 +43,7 @@ TabuSearch::TabuSearch(vector<vector< double > > Q, vector<int> initSol, int ten
     bqp.nVars = nvars;
     bqp.restartNum = 0;
     bqp.Q.resize(nvars);
-    bqp.upperBound = std::numeric_limits<long>::min();
+    bqp.upperBound = std::numeric_limits<double>::min();
     for (int i = 0; i < nvars; i++)
         bqp.Q[i].resize(nvars);
 
@@ -51,7 +51,7 @@ TabuSearch::TabuSearch(vector<vector< double > > Q, vector<int> initSol, int ten
         for (int j = i; j < nvars; j++){
             if (Q[i][j] != Q[j][i])
                 throw Exception("Q must be symmetric");
-            bqp.Q[i][j] = bqp.Q[j][i] = (long) (Q[i][j] * scaleFactor);
+            bqp.Q[i][j] = bqp.Q[j][i] = Q[i][j]; //(long) (Q[i][j] * scaleFactor);
         }
     }
     bqp.solution.resize(nvars);
@@ -62,7 +62,7 @@ TabuSearch::TabuSearch(vector<vector< double > > Q, vector<int> initSol, int ten
 
 double TabuSearch::bestEnergy()
 {
-    return (double)bqpUtil_getObjective(&bqp, vector_data<int>(bqp.solution)) / sf;
+    return bqpUtil_getObjective(&bqp, vector_data<int>(bqp.solution)) / sf;
 }
 
 vector<int> TabuSearch::bestSolution()

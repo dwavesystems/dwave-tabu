@@ -19,9 +19,9 @@
 
 using std::vector;
 
-long bqpUtil_getMaxBQPCoeff(BQP *bqp) {
+double bqpUtil_getMaxBQPCoeff(BQP *bqp) {
     int i, j;
-    long M = bqp->Q[0][0];
+    double M = bqp->Q[0][0];
     for(i = 0; i < bqp->nVars; i++) {
         for(j = 0; j < bqp->nVars; j++) {
             if(M < abs(bqp->Q[i][j])) {
@@ -56,9 +56,9 @@ void bqpUtil_print(BQP *bqp) {
     printf("}\n");
 }
 
-long bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit) {
+double bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit) {
     int i;
-    long change = 0, inc;
+    double change = 0, inc;
     change += (oldSolution[flippedBit] == 1)? (-1 * bqp->Q[flippedBit][flippedBit]) : bqp->Q[flippedBit][flippedBit];
     for(i = bqp->nVars; i--;) {
         if(!(oldSolution[i] ^ 1) && i ^ flippedBit) {
@@ -69,9 +69,9 @@ long bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit) {
     return change;
 }
 
-long bqpUtil_getObjective(BQP *bqp, int * solution) {
+double bqpUtil_getObjective(BQP *bqp, int * solution) {
     int i;
-    long cost = 0;
+    double cost = 0;
     vector<int> u_zeroSol(bqp->nVars);
     int *zeroSolution = vector_data<int>(u_zeroSol);
     for(i = bqp->nVars; i--;) {
@@ -86,9 +86,9 @@ long bqpUtil_getObjective(BQP *bqp, int * solution) {
     return cost;
 }
 
-long bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, long oldCost) {
+double bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, double oldCost) {
     int i;
-    long cost = oldCost;
+    double cost = oldCost;
     vector<int> u_old(bqp->nVars);
     int *oldSolCopy = vector_data<int>(u_old);
     for(i = 0; i < bqp->nVars; i++) {

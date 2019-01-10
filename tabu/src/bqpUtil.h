@@ -32,16 +32,16 @@
  * nIterations: number of iterations required to arrive at this solution
  */
 typedef struct {
-	std::vector<std::vector<long> >Q;
+	std::vector<std::vector<double> >Q;
 	int nVars;
 	std::vector<int> solution;
-	long solutionQuality;
+	double solutionQuality;
 	unsigned long long nIterations;
 	/*added to record more statistics.*/
 	unsigned long long restartNum;
 	unsigned long long iterNum;
 	unsigned long long evalNum;
-	long upperBound;
+	double upperBound;
 } BQP;
 
 
@@ -50,7 +50,7 @@ typedef struct {
  * @param bqp
  * @return maximum Q[i][j]
  */
-long bqpUtil_getMaxBQPCoeff(BQP *bqp);
+double bqpUtil_getMaxBQPCoeff(BQP *bqp);
 
 /**
  * converts a generic bqp Q matrix into upper trianglular using:
@@ -75,7 +75,7 @@ void bqpUtil_print(BQP *bqp);
  * @param flippedBit: the bit that is flipped
  * @return change in objective
  */
-long bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit);
+double bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit);
 
 /**
  * Computes the value of objective function of a BQP for a given solution
@@ -83,7 +83,7 @@ long bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit);
  * @param solution: given solution
  * @return value of objective function
  */
-long bqpUtil_getObjective(BQP *bqp, int * solution);
+double bqpUtil_getObjective(BQP *bqp, int * solution);
 
 /**
  * Computes the value of objective function of a BQP for a given solution,
@@ -97,7 +97,7 @@ long bqpUtil_getObjective(BQP *bqp, int * solution);
  * @param oldCost: value of objective function at old solution
  * @return value ot objective function at new solution
  */
-long bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, long oldCost);
+double bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, long oldCost);
 
 /**
  * Initialize the current solution in a BQP to all zeros
