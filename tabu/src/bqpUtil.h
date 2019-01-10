@@ -75,7 +75,7 @@ void bqpUtil_print(BQP *bqp);
  * @param flippedBit: the bit that is flipped
  * @return change in objective
  */
-double bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit);
+double bqpUtil_getChangeInObjective(BQP *bqp, std::vector<int> &oldSolution, int flippedBit);
 
 /**
  * Computes the value of objective function of a BQP for a given solution
@@ -83,7 +83,7 @@ double bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit);
  * @param solution: given solution
  * @return value of objective function
  */
-double bqpUtil_getObjective(BQP *bqp, int * solution);
+double bqpUtil_getObjective(BQP *bqp, std::vector<int> & solution);
 
 /**
  * Computes the value of objective function of a BQP for a given solution,
@@ -97,14 +97,14 @@ double bqpUtil_getObjective(BQP *bqp, int * solution);
  * @param oldCost: value of objective function at old solution
  * @return value ot objective function at new solution
  */
-double bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, long oldCost);
+double bqpUtil_getObjectiveIncremental(BQP *bqp, std::vector<int> &solution, std::vector<int> &oldSolution, long oldCost);
 
 /**
  * Initialize the current solution in a BQP to all zeros
  * @param bqp: the BQP
  * @return void
  */
-void bqpUtil_initBQPSolution(BQP *bqp, const int *initSolution);
+void bqpUtil_initBQPSolution(BQP *bqp, std::vector<int> const &initSolution);
 
 /**
  * Initialize the current solution in a BQP randomly
@@ -126,12 +126,5 @@ void bqpUtil_free(BQP *bqp);
  * @return void
  */
 void bqpUtil_printSolution(BQP *bqp);
-
-// replacement for vector.data() in ancient compilers not supporting it (VS2008, aka VS9)
-// NB: we need to support VS9 is we want to build for python2.7 on windows
-template<typename T>
-T* vector_data(std::vector<T>& v) {
-    return v.size() ? &v[0] : NULL;
-}
 
 #endif

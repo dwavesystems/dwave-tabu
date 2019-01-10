@@ -56,7 +56,7 @@ void bqpUtil_print(BQP *bqp) {
     printf("}\n");
 }
 
-double bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit) {
+double bqpUtil_getChangeInObjective(BQP *bqp, vector<int> &oldSolution, int flippedBit) {
     int i;
     double change = 0, inc;
     change += (oldSolution[flippedBit] == 1)? (-1 * bqp->Q[flippedBit][flippedBit]) : bqp->Q[flippedBit][flippedBit];
@@ -69,11 +69,10 @@ double bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit) 
     return change;
 }
 
-double bqpUtil_getObjective(BQP *bqp, int * solution) {
+double bqpUtil_getObjective(BQP *bqp, vector<int> &solution) {
     int i;
     double cost = 0;
-    vector<int> u_zeroSol(bqp->nVars);
-    int *zeroSolution = vector_data<int>(u_zeroSol);
+    vector<int> zeroSolution(bqp->nVars);
     for(i = bqp->nVars; i--;) {
         zeroSolution[i] = 0;
     }
@@ -86,11 +85,10 @@ double bqpUtil_getObjective(BQP *bqp, int * solution) {
     return cost;
 }
 
-double bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, double oldCost) {
+double bqpUtil_getObjectiveIncremental(BQP *bqp, vector<int> &solution, vector<int> &oldSolution, double oldCost) {
     int i;
     double cost = oldCost;
-    vector<int> u_old(bqp->nVars);
-    int *oldSolCopy = vector_data<int>(u_old);
+    vector<int> oldSolCopy(bqp->nVars);
     for(i = 0; i < bqp->nVars; i++) {
         oldSolCopy[i] = oldSolution[i];
     }
@@ -103,17 +101,9 @@ double bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution
     return cost;
 }
 
-void bqpUtil_initBQPSolution(BQP *bqp, const int *initSolution) {
-    int i;
-
-    if (initSolution == NULL) {
-      for(i = 0; i < bqp->nVars; i++) {
-          bqp->solution[i] = 0;
-      }
-    } else {
-      memcpy(vector_data<int>(bqp->solution), initSolution, bqp->nVars * sizeof(int));
-    }
-    bqp->solutionQuality = bqpUtil_getObjective(bqp, vector_data<int>(bqp->solution));
+void bqpUtil_initBQPSolution(BQP *bqp, vector<int> const &initSolution) {
+    bqp->solution = initSolution;
+    bqp->solutionQuality = bqpUtil_getObjective(bqp, bqp->solution);
     bqp->nIterations = 1;
 }
 
@@ -128,12 +118,12 @@ void bqpUtil_randomizeBQPSolution(BQP *bqp) {
         }
     }
     bqp->nIterations = 1;
-    bqp->solutionQuality = bqpUtil_getObjective(bqp, vector_data<int>(bqp->solution));
+    bqp->solutionQuality = bqpUtil_getObjective(bqp, bqp->solution);
 }
 
 void bqpUtil_printSolution(BQP *bqp) {
     int i;
-    printf("Objective function value: %ld\n", bqpUtil_getObjective(bqp, vector_data<int>(bqp->solution)));
+    printf("Objective function value: %ld\n", bqpUtil_getObjective(bqp, bqp->solution));
     printf("Variable assignment:\n");
     for(i = 0; i < bqp->nVars; i++) {
         printf("%d ", bqp->solution[i]);

@@ -20,7 +20,7 @@ using std::vector;
 
 double bqpSolver_tabooSearch(
     BQP *bqp,
-    int *starting,
+    vector<int> &starting,
     double startingObjective,
     int tt,
     long long ZCoeff,
@@ -36,19 +36,16 @@ double bqpSolver_tabooSearch(
     int bestK;
     double localMinCost, cost = 0;
     double prevCost;
-    vector<int> u_tabu(bqp->nVars);
-    int *taboo = vector_data<int>(u_tabu);
-    vector<int> u_sol(bqp->nVars);
-    int *solution = vector_data<int>(u_sol);
+    vector<int> taboo(bqp->nVars);
+    vector<int> solution(bqp->nVars);
     int tabooTenure = (20 < (int)(bqp->nVars / 4.0))? 20 : (int)(bqp->nVars / 4.0);
     long long maxIter = (500000 > ZCoeff * (long long)bqp->nVars)? 500000 : ZCoeff * (long long)bqp->nVars;
-    vector<double> u_change(bqp->nVars);
-    double *changeInObjective = vector_data<double>(u_change);
+     vector<double> changeInObjective(bqp->nVars);
     double change;
     double timeLimit = (((double)timeLimitInMilliSecs * (double)CLOCKS_PER_SEC) / (1000.0));
 
-    vector<int> u_tieList(bqp->nVars);
-    int numTies = 0, *tieList = vector_data<int>(u_tieList);
+    vector<int> tieList(bqp->nVars);
+    int numTies = 0;
 
     if (tt > 0) {
       tabooTenure = tt;
@@ -138,7 +135,7 @@ double bqpSolver_tabooSearch(
     return bqp->solutionQuality;
 }
 
-double bqpSolver_localSearchInternal(BQP *bqp, int *starting, double startingObjective, double *changeInObjective) {
+double bqpSolver_localSearchInternal(BQP *bqp, vector<int> &starting, double startingObjective, vector<double> &changeInObjective) {
     int i, j;
     long long iter = 0;
     double objective, change;
@@ -169,10 +166,9 @@ double bqpSolver_localSearchInternal(BQP *bqp, int *starting, double startingObj
     return bqp->solutionQuality;
 }
 
-double bqpSolver_localSearch(BQP *bqp, int *starting) {
+double bqpSolver_localSearch(BQP *bqp, vector<int> &starting) {
     int i;
-    vector<double> u_change(bqp->nVars);
-    double *changeInObjective = vector_data<double>(u_change);
+    vector<double> changeInObjective(bqp->nVars);
     for(i = 0; i < bqp->nVars; i++) {
         changeInObjective[i] = bqpUtil_getChangeInObjective(bqp, starting, i);
     }
@@ -180,17 +176,13 @@ double bqpSolver_localSearch(BQP *bqp, int *starting) {
     return bqp->solutionQuality;
 }
 
-void bqpSolver_selectVariables(BQP *bqp, int n, vector<vector<double> > &C, int *I) {
+void bqpSolver_selectVariables(BQP *bqp, int n, vector< vector<double> > &C, vector<int> &I) {
     int i, ctr;
-    vector<double> u_d(bqp->nVars);
-    double *d = vector_data<double>(u_d);
-    vector<int> u_sel(bqp->nVars);
-    int *selected = vector_data<int>(u_sel);
+    vector<double> d(bqp->nVars);
+    vector<int> selected(bqp->nVars);
     int selectedVar = 0;
-    vector<double> u_e(bqp->nVars);
-    double *e = vector_data<double>(u_e);
-    vector<double> u_prob(bqp->nVars);
-    double *prob = vector_data<double>(u_prob);
+    vector<double> e(bqp->nVars);
+    vector<double> prob(bqp->nVars);
     double selectedProb, prevProb, sumE;
     int allDsEqual;
     double dmin, dmax;
@@ -282,19 +274,14 @@ void bqpSolver_selectVariables(BQP *bqp, int n, vector<vector<double> > &C, int 
     }
 }
 
-void bqpSolver_steepestAscent(int *solution, BQP *bqp, vector<vector<double> > &C, int *I, int n) {
+void bqpSolver_steepestAscent(vector<int> &solution, BQP *bqp, vector< vector<double> > &C, vector<int> &I, int n) {
     int i, j, ctr;
     int idI, idJ, r, v = 0;
-    vector<double> u_h1(bqp->nVars);
-    vector<double> u_h2(bqp->nVars);
-    vector<double> u_q1(bqp->nVars);
-    vector<double> u_q2(bqp->nVars);
-    double *h1 = vector_data<double>(u_h1);
-    double *h2 = vector_data<double>(u_h2);
-    double *q1 = vector_data<double>(u_q1);
-    double *q2 = vector_data<double>(u_q2);
-    vector<int> u_visited(bqp->nVars);
-    int *visited = vector_data<int>(u_visited);
+    vector<double> h1(bqp->nVars);
+    vector<double> h2(bqp->nVars);
+    vector<double> q1(bqp->nVars);
+    vector<double> q2(bqp->nVars);
+    vector<int> visited(bqp->nVars);
     double V1, V2;
     for(i = 0; i < bqp->nVars; i++) {
         visited[i] = 0;
@@ -352,7 +339,7 @@ void bqpSolver_steepestAscent(int *solution, BQP *bqp, vector<vector<double> > &
     }
 }
 
-void bqpSolver_computeC(vector<vector<double> > &C, BQP *bqp, int *solution) {
+void bqpSolver_computeC(vector< vector<double> > &C, BQP *bqp, vector<int> &solution) {
     int i, j;
     for(i = 0; i < bqp->nVars; i++) {
         C[i][i] = -bqp->Q[i][i];
@@ -372,20 +359,17 @@ double bqpSolver_multiStartTabooSearch(
     long long timeLimitInMilliSecs,
     int numStarts,
     int tabuTenure,
-    const int *initSolution,
+    vector<int> const &initSolution,
     const bqpSolver_Callback *callback
 ) {
 
     clock_t startTime = clock();
     int i;
     long iter;
-    vector<vector<double> > C(bqp->nVars);
-    vector<int> u_I(bqp->nVars);
-    int *I = vector_data<int>(u_I);
-    vector<int> u_sol(bqp->nVars);
-    int *solution = vector_data<int>(u_sol);
-    vector<int> u_bestSol(bqp->nVars);
-    int *bestSolution = vector_data<int>(u_bestSol);
+    vector< vector<double> > C(bqp->nVars);
+    vector<int> I(bqp->nVars);
+    vector<int> solution(bqp->nVars);
+    vector<int> bestSolution(bqp->nVars);
     double bestSolutionQuality;
     int n;
     int Z1Coeff = (bqp->nVars <= 500)? 10000 : 25000;
@@ -397,7 +381,7 @@ double bqpSolver_multiStartTabooSearch(
     bqpUtil_convertBQPToUpperTriangular(bqp);
     bqpUtil_initBQPSolution(bqp, initSolution);
 
-    bqpSolver_tabooSearch(bqp, vector_data<int>(bqp->solution), bqp->solutionQuality, tabuTenure, Z1Coeff, timeLimitInMilliSecs, callback);
+    bqpSolver_tabooSearch(bqp, bqp->solution, bqp->solutionQuality, tabuTenure, Z1Coeff, timeLimitInMilliSecs, callback);
     bestSolutionQuality = bqp->solutionQuality;
     for(i = 0; i < bqp->nVars; i++) {
         bestSolution[i] = bqp->solution[i];
@@ -409,7 +393,7 @@ double bqpSolver_multiStartTabooSearch(
         if(n > bqp->nVars) {
             n = bqp->nVars;
         }
-        bqpSolver_computeC(C, bqp, vector_data<int>(bqp->solution));
+        bqpSolver_computeC(C, bqp, bqp->solution);
         bqpSolver_selectVariables(bqp, n, C, I);
         bqpSolver_steepestAscent(solution, bqp, C, I, n);
         for(i = 0; i < n; i++) {
@@ -417,8 +401,8 @@ double bqpSolver_multiStartTabooSearch(
                 bqp->solution[I[i]] = 1 - bqp->solution[I[i]];
             }
         }
-        bqp->solutionQuality = bqpUtil_getObjective(bqp, vector_data<int>(bqp->solution));
-        bqpSolver_tabooSearch(bqp, vector_data<int>(bqp->solution), bqp->solutionQuality, tabuTenure, Z2Coeff, timeLimitInMilliSecs - (((clock() - startTime) * 1000.0) / (double)CLOCKS_PER_SEC), callback);
+        bqp->solutionQuality = bqpUtil_getObjective(bqp, bqp->solution);
+        bqpSolver_tabooSearch(bqp, bqp->solution, bqp->solutionQuality, tabuTenure, Z2Coeff, timeLimitInMilliSecs - (((clock() - startTime) * 1000.0) / (double)CLOCKS_PER_SEC), callback);
         if(bestSolutionQuality > bqp->solutionQuality) {
             bestSolutionQuality = bqp->solutionQuality;
             for(i = 0; i < bqp->nVars; i++) {
@@ -441,10 +425,8 @@ double bqpSolver_naiveSearch(BQP *bqp) {
     unsigned long long num, grayNum;
     double cost, prevCost, minCost;
     int flippedBit;
-    vector<int> u_sol(bqp->nVars);
-    int *solution = vector_data<int>(u_sol);
-    vector<int> u_preSol(bqp->nVars);
-    int *prevSolution = vector_data<int>(u_preSol);
+    vector<int> solution(bqp->nVars);
+    vector<int> prevSolution(bqp->nVars);
     if(bqp->nVars > 64) {
         bqpUtil_randomizeBQPSolution(bqp);
         return bqp->solutionQuality;
@@ -487,7 +469,7 @@ double bqpSolver_naiveSearch(BQP *bqp) {
     return bqp->solutionQuality;
 }
 
-double bqpSolver_restrictedLocalSearchInternal(BQP *bqp, int *starting, int *restricted, double startingObjective, double *changeInObjective) {
+double bqpSolver_restrictedLocalSearchInternal(BQP *bqp, vector<int> &starting, vector<int> &restricted, double startingObjective, vector<double> &changeInObjective) {
     int i, j;
     long long iter = 0;
     double objective, change;
@@ -521,10 +503,9 @@ double bqpSolver_restrictedLocalSearchInternal(BQP *bqp, int *starting, int *res
     return bqp->solutionQuality;
 }
 
-double bqpSolver_restrictedLocalSearch(BQP *bqp, int *starting, int *restricted) {
+double bqpSolver_restrictedLocalSearch(BQP *bqp, vector<int> &starting, vector<int> &restricted) {
     int i;
-    vector<double> u_change(bqp->nVars);
-    double *changeInObjective = vector_data<double>(u_change);
+    vector<double> changeInObjective(bqp->nVars);
     for(i = 0; i < bqp->nVars; i++) {
         changeInObjective[i] = bqpUtil_getChangeInObjective(bqp, starting, i);
     }
