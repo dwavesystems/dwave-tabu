@@ -39,7 +39,7 @@ TabuSearch::TabuSearch(vector<vector< double > > Q, vector<int> initSol, int ten
     bqp.nVars = nvars;
     bqp.restartNum = 0;
     bqp.Q.resize(nvars);
-    bqp.upperBound = std::numeric_limits<double>::min();
+    bqp.upperBound = std::numeric_limits<double>::lowest();
     for (int i = 0; i < nvars; i++)
         bqp.Q[i].resize(nvars);
 
