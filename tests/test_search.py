@@ -14,6 +14,7 @@
 
 """Test the (private) TabuSearch python interface."""
 
+import time
 import unittest
 
 import dimod
@@ -21,8 +22,49 @@ import dimod
 import tabu
 
 
+try:
+    perf_counter = time.perf_counter
+except AttributeError:  # pragma: no cover
+    # python 2
+    perf_counter = time.time
+
+class RunTimeAssertionMixin(object):
+
+    class assertMaxRuntime(object):
+
+        def __init__(self, timeout):
+            """Timeout in milliseconds."""
+            self.timeout = timeout
+
+        def __enter__(self):
+            self.tick = perf_counter()
+            return self
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            self.dt = (perf_counter() - self.tick) * 1000.0
+            print("runtime", self.dt)
+            if self.dt > self.timeout:
+                raise AssertionError("Max runtime exceeded: %g ms > %g ms" % (self.dt, self.timeout))
+
+
 class TestTabuSearch(unittest.TestCase):
-    def test_basic(self):
+
+    def test_trivial(self):
+        qubo = [[1]]
+        init = [1]
+        tenure = len(init) - 1
+        scale = 1
+        timeout = 1
+
+        search = tabu.TabuSearch(qubo, init, tenure, scale, timeout)
+
+        solution = list(search.bestSolution())
+        energy = search.bestEnergy()
+
+        self.assertEqual(solution, [0])
+        self.assertEqual(energy, 0.0)
+
+    def test_correctness(self):
         qubo = [[2, 1, 1], [1, 2, 1], [1, 1, 2]]
         init = [1, 1, 1]
         tenure = len(init) - 1
