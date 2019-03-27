@@ -16,6 +16,7 @@
 
 import time
 import unittest
+from concurrent.futures import ThreadPoolExecutor, wait
 
 import dimod
 
@@ -42,12 +43,11 @@ class RunTimeAssertionMixin(object):
 
         def __exit__(self, exc_type, exc_value, traceback):
             self.dt = (perf_counter() - self.tick) * 1000.0
-            print("runtime", self.dt)
             if self.dt > self.timeout:
                 raise AssertionError("Max runtime exceeded: %g ms > %g ms" % (self.dt, self.timeout))
 
 
-class TestTabuSearch(unittest.TestCase):
+class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
 
     def test_trivial(self):
         qubo = [[1]]
@@ -78,3 +78,13 @@ class TestTabuSearch(unittest.TestCase):
 
         self.assertEqual(solution, [0, 0, 0])
         self.assertEqual(energy, 0.0)
+
+    def test_concurrency(self):
+
+        def search(timeout):
+            tabu.TabuSearch([[1]], [1], 0, 1, timeout).bestEnergy()
+
+        with self.assertMaxRuntime(1000):
+            with ThreadPoolExecutor(max_workers=3) as executor:
+                futures = [executor.submit(search, timeout=500) for _ in range(3)]
+            wait(futures)
