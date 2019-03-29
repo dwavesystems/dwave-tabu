@@ -102,7 +102,12 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         def search(timeout):
             return tabu.TabuSearch([[1]], [1], 0, 1, timeout).bestEnergy()
 
-        with self.assertRuntimeWithin(500, 1000):
-            with ThreadPoolExecutor(max_workers=3) as executor:
-                futures = [executor.submit(search, timeout=500) for _ in range(3)]
-            wait(futures)
+        with ThreadPoolExecutor(max_workers=3) as executor:
+
+            # ~ 500 ms
+            with self.assertRuntimeWithin(400, 600):
+                wait([executor.submit(search, timeout=500) for _ in range(3)])
+
+            # ~ 1000 ms
+            with self.assertRuntimeWithin(900, 1100):
+                wait([executor.submit(search, timeout=500) for _ in range(4)])
