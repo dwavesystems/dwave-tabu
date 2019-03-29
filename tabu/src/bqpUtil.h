@@ -134,4 +134,7 @@ T* vector_data(std::vector<T>& v) {
     return v.size() ? &v[0] : NULL;
 }
 
+// high-precision per-thread monotonic clock value expressed in milliseconds
+long long realtime_clock();
+
 #endif

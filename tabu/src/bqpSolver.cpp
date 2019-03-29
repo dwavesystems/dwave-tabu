@@ -27,7 +27,7 @@ long bqpSolver_tabooSearch(
     const bqpSolver_Callback *callback
 ) {
     bqp->restartNum++;/*added to record more statistics.*/
-    clock_t startTime = clock();
+    long long startTime = realtime_clock();
     int i, k, j;
     int globalMinFound;
     long /*objectiveChangeCtr = 0,*/ localSearchCtr = 0;
@@ -43,7 +43,6 @@ long bqpSolver_tabooSearch(
     long long maxIter = (500000 > ZCoeff * (long long)bqp->nVars)? 500000 : ZCoeff * (long long)bqp->nVars;
     vector<long> u_change(bqp->nVars);
     long *changeInObjective = vector_data<long>(u_change), change;
-    double timeLimit = (((double)timeLimitInMilliSecs * (double)CLOCKS_PER_SEC) / (1000.0));
 
     vector<int> u_tieList(bqp->nVars);
     int numTies = 0, *tieList = vector_data<int>(u_tieList);
@@ -60,7 +59,7 @@ long bqpSolver_tabooSearch(
     }
     bqp->solutionQuality = startingObjective;
     prevCost = bqp->solutionQuality;
-    while(iter < maxIter && (clock() - startTime) < timeLimit) {
+    while(iter < maxIter && (realtime_clock() - startTime) < timeLimitInMilliSecs) {
         bqp->iterNum++; /*added to record more statistics.*/
         localMinCost = LARGE_NUMBER;
         bestK = -1;
@@ -130,7 +129,7 @@ long bqpSolver_tabooSearch(
               callback->func(callback, bqp);
             }
 
-            if (bqp->solutionQuality <= bqp->upperBound) timeLimit = 0;
+            if (bqp->solutionQuality <= bqp->upperBound) timeLimitInMilliSecs = 0;
         }
     }
     return bqp->solutionQuality;
@@ -374,7 +373,7 @@ long bqpSolver_multiStartTabooSearch(
     const bqpSolver_Callback *callback
 ) {
 
-    clock_t startTime = clock();
+    long long startTime = realtime_clock();
     int i;
     long iter;
     vector<vector<long> > C(bqp->nVars);
@@ -396,12 +395,13 @@ long bqpSolver_multiStartTabooSearch(
     bqpUtil_initBQPSolution(bqp, initSolution);
 
     bqpSolver_tabooSearch(bqp, vector_data<int>(bqp->solution), bqp->solutionQuality, tabuTenure, Z1Coeff, timeLimitInMilliSecs, callback);
+
     bestSolutionQuality = bqp->solutionQuality;
     for(i = 0; i < bqp->nVars; i++) {
         bestSolution[i] = bqp->solution[i];
     }
 
-    for(iter = 0; iter < numStarts && (clock() - startTime) < (((double)timeLimitInMilliSecs * (double)CLOCKS_PER_SEC) / (1000.0)); iter++) {
+    for(iter = 0; iter < numStarts && ((realtime_clock() - startTime) < timeLimitInMilliSecs); iter++) {
         if (bqp->solutionQuality <= bqp->upperBound) timeLimitInMilliSecs = 0;
         n = (10 > (int)(ALPHA * bqp->nVars))? 10 : (int)(ALPHA * bqp->nVars);
         if(n > bqp->nVars) {
@@ -416,7 +416,9 @@ long bqpSolver_multiStartTabooSearch(
             }
         }
         bqp->solutionQuality = bqpUtil_getObjective(bqp, vector_data<int>(bqp->solution));
-        bqpSolver_tabooSearch(bqp, vector_data<int>(bqp->solution), bqp->solutionQuality, tabuTenure, Z2Coeff, timeLimitInMilliSecs - (((clock() - startTime) * 1000.0) / (double)CLOCKS_PER_SEC), callback);
+
+        bqpSolver_tabooSearch(bqp, vector_data<int>(bqp->solution), bqp->solutionQuality, tabuTenure, Z2Coeff, timeLimitInMilliSecs - (realtime_clock() - startTime), callback);
+
         if(bestSolutionQuality > bqp->solutionQuality) {
             bestSolutionQuality = bqp->solutionQuality;
             for(i = 0; i < bqp->nVars; i++) {
@@ -431,6 +433,7 @@ long bqpSolver_multiStartTabooSearch(
     for(i = 0; i < bqp->nVars; i++) {
         bqp->solution[i] = bestSolution[i];
     }
+
     return bqp->solutionQuality;
 }
 
