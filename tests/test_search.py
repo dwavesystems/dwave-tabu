@@ -31,11 +31,11 @@ except AttributeError:  # pragma: no cover
 
 class RunTimeAssertionMixin(object):
 
-    class assertMaxRuntime(object):
+    class assertRuntimeWithin(object):
 
-        def __init__(self, t):
-            """Timeout in milliseconds."""
-            self.limit = t
+        def __init__(self, low, high):
+            """Min/max runtime in milliseconds."""
+            self.limits = (low, high)
 
         def __enter__(self):
             self.tick = perf_counter()
@@ -46,14 +46,23 @@ class RunTimeAssertionMixin(object):
             self.test()
 
         def test(self):
-            if self.dt > self.limit:
-                raise AssertionError("Max runtime exceeded: %g ms > %g ms" % (self.dt, self.limit))
+            low, high = self.limits
+            if low is not None and self.dt < low:
+                raise AssertionError("Min runtime unreached: %g ms < %g ms" % (self.dt, low))
+            if high is not None and self.dt > high:
+                raise AssertionError("Max runtime exceeded: %g ms > %g ms" % (self.dt, high))
 
-    class assertMinRuntime(assertMaxRuntime):
+    class assertMinRuntime(assertRuntimeWithin):
 
-        def test(self):
-            if self.dt < self.limit:
-                raise AssertionError("Min runtime unreached: %g ms < %g ms" % (self.dt, self.limit))
+        def __init__(self, t):
+            """Min runtime in milliseconds."""
+            self.limits = (t, None)
+
+    class assertMaxRuntime(assertRuntimeWithin):
+
+        def __init__(self, t):
+            """Max runtime in milliseconds."""
+            self.limits = (None, t)
 
 
 class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
@@ -93,12 +102,7 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         def search(timeout):
             return tabu.TabuSearch([[1]], [1], 0, 1, timeout).bestEnergy()
 
-        with self.assertMaxRuntime(1000):
-            with ThreadPoolExecutor(max_workers=3) as executor:
-                futures = [executor.submit(search, timeout=500) for _ in range(3)]
-            wait(futures)
-
-        with self.assertMinRuntime(500):
+        with self.assertRuntimeWithin(500, 1000):
             with ThreadPoolExecutor(max_workers=3) as executor:
                 futures = [executor.submit(search, timeout=500) for _ in range(3)]
             wait(futures)
