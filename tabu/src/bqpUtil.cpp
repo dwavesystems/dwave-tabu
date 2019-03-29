@@ -14,10 +14,12 @@
 
 #include <stdlib.h>
 #include <vector>
+#include <chrono>
 
 #include "bqpUtil.h"
 
 using std::vector;
+
 
 long bqpUtil_getMaxBQPCoeff(BQP *bqp) {
     int i, j;
@@ -145,4 +147,10 @@ long long realtime_clock() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+}
+
+long long chrono_clock() {
+    auto now = std::chrono::steady_clock::now();
+    auto ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+    return ms.time_since_epoch().count();
 }
