@@ -33,9 +33,9 @@ class RunTimeAssertionMixin(object):
 
     class assertMaxRuntime(object):
 
-        def __init__(self, timeout):
+        def __init__(self, t):
             """Timeout in milliseconds."""
-            self.timeout = timeout
+            self.limit = t
 
         def __enter__(self):
             self.tick = perf_counter()
@@ -43,8 +43,17 @@ class RunTimeAssertionMixin(object):
 
         def __exit__(self, exc_type, exc_value, traceback):
             self.dt = (perf_counter() - self.tick) * 1000.0
-            if self.dt > self.timeout:
-                raise AssertionError("Max runtime exceeded: %g ms > %g ms" % (self.dt, self.timeout))
+            self.test()
+
+        def test(self):
+            if self.dt > self.limit:
+                raise AssertionError("Max runtime exceeded: %g ms > %g ms" % (self.dt, self.limit))
+
+    class assertMinRuntime(assertMaxRuntime):
+
+        def test(self):
+            if self.dt < self.limit:
+                raise AssertionError("Min runtime unreached: %g ms < %g ms" % (self.dt, self.limit))
 
 
 class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
@@ -82,9 +91,14 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
     def test_concurrency(self):
 
         def search(timeout):
-            tabu.TabuSearch([[1]], [1], 0, 1, timeout).bestEnergy()
+            return tabu.TabuSearch([[1]], [1], 0, 1, timeout).bestEnergy()
 
         with self.assertMaxRuntime(1000):
+            with ThreadPoolExecutor(max_workers=3) as executor:
+                futures = [executor.submit(search, timeout=500) for _ in range(3)]
+            wait(futures)
+
+        with self.assertMinRuntime(500):
             with ThreadPoolExecutor(max_workers=3) as executor:
                 futures = [executor.submit(search, timeout=500) for _ in range(3)]
             wait(futures)
