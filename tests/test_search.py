@@ -104,10 +104,10 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
 
         with ThreadPoolExecutor(max_workers=3) as executor:
 
-            # ~ 500 ms
-            with self.assertRuntimeWithin(400, 600):
+            # ~ 500 ms (but be gracious on slow CI VMs)
+            with self.assertRuntimeWithin(400, 1400):
                 wait([executor.submit(search, timeout=500) for _ in range(3)])
 
-            # ~ 1000 ms
-            with self.assertRuntimeWithin(900, 1100):
+            # ~ 1000 ms (but be gracious on slow CI VMs)
+            with self.assertRuntimeWithin(900, 1900):
                 wait([executor.submit(search, timeout=500) for _ in range(4)])
