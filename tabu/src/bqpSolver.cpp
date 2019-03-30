@@ -27,7 +27,7 @@ long bqpSolver_tabooSearch(
     const bqpSolver_Callback *callback
 ) {
     bqp->restartNum++;/*added to record more statistics.*/
-    long long startTime = chrono_clock();
+    long long startTime = realtime_clock();
     int i, k, j;
     int globalMinFound;
     long /*objectiveChangeCtr = 0,*/ localSearchCtr = 0;
@@ -59,7 +59,7 @@ long bqpSolver_tabooSearch(
     }
     bqp->solutionQuality = startingObjective;
     prevCost = bqp->solutionQuality;
-    while(iter < maxIter && (chrono_clock() - startTime) < timeLimitInMilliSecs) {
+    while(iter < maxIter && (realtime_clock() - startTime) < timeLimitInMilliSecs) {
         bqp->iterNum++; /*added to record more statistics.*/
         localMinCost = LARGE_NUMBER;
         bestK = -1;
@@ -373,7 +373,7 @@ long bqpSolver_multiStartTabooSearch(
     const bqpSolver_Callback *callback
 ) {
 
-    long long startTime = chrono_clock();
+    long long startTime = realtime_clock();
     int i;
     long iter;
     vector<vector<long> > C(bqp->nVars);
@@ -401,7 +401,7 @@ long bqpSolver_multiStartTabooSearch(
         bestSolution[i] = bqp->solution[i];
     }
 
-    for(iter = 0; iter < numStarts && ((chrono_clock() - startTime) < timeLimitInMilliSecs); iter++) {
+    for(iter = 0; iter < numStarts && ((realtime_clock() - startTime) < timeLimitInMilliSecs); iter++) {
         if (bqp->solutionQuality <= bqp->upperBound) timeLimitInMilliSecs = 0;
         n = (10 > (int)(ALPHA * bqp->nVars))? 10 : (int)(ALPHA * bqp->nVars);
         if(n > bqp->nVars) {
@@ -417,7 +417,7 @@ long bqpSolver_multiStartTabooSearch(
         }
         bqp->solutionQuality = bqpUtil_getObjective(bqp, vector_data<int>(bqp->solution));
 
-        bqpSolver_tabooSearch(bqp, vector_data<int>(bqp->solution), bqp->solutionQuality, tabuTenure, Z2Coeff, timeLimitInMilliSecs - (chrono_clock() - startTime), callback);
+        bqpSolver_tabooSearch(bqp, vector_data<int>(bqp->solution), bqp->solutionQuality, tabuTenure, Z2Coeff, timeLimitInMilliSecs - (realtime_clock() - startTime), callback);
 
         if(bestSolutionQuality > bqp->solutionQuality) {
             bestSolutionQuality = bqp->solutionQuality;

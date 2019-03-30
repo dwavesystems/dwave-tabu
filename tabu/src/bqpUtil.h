@@ -22,7 +22,6 @@
 #include <time.h>
 #include <math.h>
 #include <vector>
-#include <chrono>
 
 /**
  * structure to represent a BQP
@@ -137,7 +136,5 @@ T* vector_data(std::vector<T>& v) {
 
 // high-precision per-thread monotonic clock value expressed in milliseconds
 long long realtime_clock();
-
-long long chrono_clock();
 
 #endif

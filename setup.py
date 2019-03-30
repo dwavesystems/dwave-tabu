@@ -44,8 +44,7 @@ ext_modules = [
         include_dirs=[
             os.path.join('tabu', 'src')
         ],
-        swig_opts=['-c++', '-threads'],
-        extra_compile_args=['-std=c++11']
+        swig_opts=['-c++', '-threads']
     )
 ]
 

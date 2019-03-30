@@ -14,7 +14,6 @@
 
 #include <stdlib.h>
 #include <vector>
-#include <chrono>
 
 #include "bqpUtil.h"
 
@@ -143,14 +142,27 @@ void bqpUtil_printSolution(BQP *bqp) {
     printf("\n");
 }
 
+
+#if defined(_WIN32) || defined(_WIN64)
+
+#include <Windows.h>
+
+long long realtime_clock() {
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER now;
+
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&now);
+
+    return (long long)(1000.0 * now.QuadPart / frequency.QuadPart);
+}
+
+#else
+
 long long realtime_clock() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 }
 
-long long chrono_clock() {
-    auto now = std::chrono::steady_clock::now();
-    auto ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
-    return ms.time_since_epoch().count();
-}
+#endif
