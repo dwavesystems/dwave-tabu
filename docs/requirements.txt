@@ -1,4 +1,4 @@
 -r ../requirements.txt
-sphinx
+sphinx<2.0.0
 sphinx_rtd_theme
 recommonmark

@@ -22,6 +22,7 @@ import tabu
 
 
 class TestTabuSampler(unittest.TestCase):
+
     def test_instantiation(self):
         sampler = tabu.TabuSampler()
         dimod.testing.assert_sampler_api(sampler)
