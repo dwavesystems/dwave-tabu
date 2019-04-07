@@ -38,6 +38,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
+    'recommonmark',
 ]
 
 autosummary_generate = True
@@ -48,13 +49,13 @@ autosummary_generate = True
 # You can specify multiple suffix as a list of string:
 #
 source_suffix = ['.rst', '.md']
-source_parsers = {'.md': 'recommonmark.parser.CommonMarkParser'}
+#source_parsers = {'.md': 'recommonmark.parser.CommonMarkParser'}
 
 # The master toctree document.
 master_doc = 'index'
 
 # Mock the C++ extension
-autodoc_mock_imports = ["tabu.tabu_search"]
+autodoc_mock_imports = ["tabu.src.tabu_search"]
 
 # Load package info, without importing the package
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
