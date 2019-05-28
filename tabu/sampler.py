@@ -66,7 +66,7 @@ class TabuSampler(dimod.Sampler):
                 If the length of `initial_states` is shorter than `num_reads`,
                 they will be expanded according to `initial_states_generator`.
 
-            initial_states_generator (str, 'none'/'tile'/'random', optional):
+            initial_states_generator (str, 'none'/'tile'/'random', optional, default='random'):
                 Defines a way `initial_states` of length differing from `num_reads`
                 get used:
 
@@ -205,6 +205,11 @@ class TabuSampler(dimod.Sampler):
             yield TabuSampler._random_sample(bqm)
 
     @staticmethod
+    def _random_sample(bqm):
+        values = list(bqm.vartype.value)
+        return {i: random.choice(values) for i in bqm.variables}
+
+    @staticmethod
     def _bqm_to_tabu_qubo(bqm):
         # Note: normally, conversion would be: `ud + ud.T - numpy.diag(numpy.diag(ud))`,
         # but the Tabu solver we're using requires slightly different qubo matrix.
@@ -235,11 +240,6 @@ class TabuSampler(dimod.Sampler):
         if isinstance(sample, (list, numpy.ndarray)):
             sample = enumerate(sample)
         return dict(sample)
-
-    @staticmethod
-    def _random_sample(bqm):
-        values = list(bqm.vartype.value)
-        return {i: random.choice(values) for i in bqm.variables}
 
 
 if __name__ == "__main__":
