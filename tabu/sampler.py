@@ -87,13 +87,14 @@ class TabuSampler(dimod.Sampler):
             :obj:`~dimod.SampleSet`: A `dimod` :obj:`.~dimod.SampleSet` object.
 
         Examples:
-            This example provides samples for a two-variable QUBO model.
+            This example samples a simple two-variable Ising model.
 
-            >>> from tabu import TabuSampler
             >>> import dimod
-            >>> sampler = TabuSampler()
-            >>> Q = {(0, 0): -1, (1, 1): -1, (0, 1): 2}
-            >>> bqm = dimod.BinaryQuadraticModel.from_qubo(Q, offset=0.0)
+            >>> bqm = dimod.BQM.from_ising({}, {'ab': 1})
+
+            >>> import tabu
+            >>> sampler = tabu.TabuSampler()
+
             >>> samples = sampler.sample(bqm)
             >>> samples.record[0].energy
             -1.0
