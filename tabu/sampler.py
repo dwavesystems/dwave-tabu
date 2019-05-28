@@ -18,6 +18,8 @@ from __future__ import division
 
 import random
 import warnings
+import itertools
+from functools import partial
 
 import numpy
 import dimod
@@ -51,8 +53,8 @@ class TabuSampler(dimod.Sampler):
                            'init_solution': []}
         self.properties = {}
 
-    def sample(self, bqm, initial_states=None, num_reads=1, tenure=None,
-               timeout=20, scale_factor=1, **kwargs):
+    def sample(self, bqm, initial_states=None, initial_states_generator='random',
+               num_reads=1, tenure=None, timeout=20, scale_factor=1, **kwargs):
         """Run Tabu search on a given binary quadratic model.
 
         Args:
@@ -60,8 +62,23 @@ class TabuSampler(dimod.Sampler):
                 The binary quadratic model (BQM) to be sampled.
 
             initial_states (:class:`~dimod.SampleSet`, optional, default=None):
-                Single sample that sets an initial state for all the problem variables.
-                Default is a random initial state.
+                One or more samples that define the initial states, one per read.
+                If the length of `initial_states` is shorter than `num_reads`,
+                they will be expanded according to `initial_states_generator`.
+
+            initial_states_generator (str, 'none'/'tile'/'random', optional):
+                Defines a way `initial_states` of length differing from `num_reads`
+                get used:
+
+                * "none":
+                    length must be greater or equal to `num_reads`, otherwise
+                    `ValueError` is raised
+                * "tile":
+                    `initial_states` shorter than `num_reads` are repeated, up to
+                    `num_reads` in length. Longer list of states is truncated.
+                * "random":
+                    similar to `tile`, but missing states are selected from a
+                    uniform random state generator.
 
             num_reads (int, optional, default=1):
                 Number of reads. Each run of the tabu algorithm generates a sample.
@@ -100,27 +117,8 @@ class TabuSampler(dimod.Sampler):
             -1.0
         """
 
-        if 'init_solution' in kwargs:
-            warnings.warn(
-                "`init_solution` is deprecated in favor of `initial_states`.",
-                DeprecationWarning)
-
-        init_solution = kwargs.pop('init_solution', initial_states)
-
-        # input checking and defaults calculation
-        # TODO: one "read" per sample in init_solution sampleset
-        if init_solution is not None:
-            if not isinstance(init_solution, dimod.SampleSet):
-                raise TypeError("'init_solution' should be a 'dimod.SampleSet' instance")
-            if len(init_solution.record) < 1:
-                raise ValueError("'init_solution' should contain at least one sample")
-            if len(init_solution.record[0].sample) != len(bqm):
-                raise ValueError("'init_solution' sample dimension different from BQM")
-            init_sample = self._bqm_sample_to_tabu_sample(
-                init_solution.change_vartype(dimod.BINARY, inplace=False).record[0].sample, bqm.binary)
-        else:
-            init_sample = None
-
+        if not isinstance(bqm, dimod.BinaryQuadraticModel):
+            raise TypeError("'bqm' should be a 'dimod.BinaryQuadraticModel' instance")
         if not bqm:
             return dimod.SampleSet.from_samples([], energy=0, vartype=bqm.vartype)
 
@@ -136,16 +134,48 @@ class TabuSampler(dimod.Sampler):
         if num_reads < 1:
             raise ValueError("'num_reads' should be a positive integer")
 
+        if 'init_solution' in kwargs:
+            warnings.warn(
+                "'init_solution' is deprecated in favor of 'initial_states'.",
+                DeprecationWarning)
+            initial_states = kwargs.pop('init_solution')
+
+        if initial_states is None:
+            initial_states = dimod.SampleSet.from_samples([], vartype=bqm.vartype, energy=0)
+
+        if not isinstance(initial_states, dimod.SampleSet):
+            raise TypeError("'initial_states' is not 'dimod.SampleSet' instance")
+
+        _generators = {
+            'none': self._none_generator,
+            'tile': self._tile_generator,
+            'random': partial(self._random_generator, bqm=bqm.binary)
+        }
+
+        if len(initial_states) < num_reads and initial_states_generator == 'none':
+            raise ValueError("insufficient 'initial_states' given")
+
+        if len(initial_states) < 1 and initial_states_generator == 'tile':
+            raise ValueError("cannot tile an empty sample set")
+
+        if initial_states and initial_states.variables ^ bqm.variables:
+            raise ValueError("mismatch between variables in 'initial_states' and 'bqm'")
+
+        if initial_states_generator not in _generators:
+            raise ValueError("unknown value for 'initial_states_generator'")
+
+        binary_initial_states = initial_states.change_vartype(dimod.BINARY, inplace=False)
+        init_sample_generator = _generators[initial_states_generator](binary_initial_states)
+
         qubo = self._bqm_to_tabu_qubo(bqm.binary)
 
         # run Tabu search
         samples = []
         energies = []
         for _ in range(num_reads):
-            if init_sample is None:
-                init_sample = self._bqm_sample_to_tabu_sample(self._random_sample(bqm.binary), bqm.binary)
-            r = TabuSearch(qubo, init_sample, tenure, scale_factor, timeout)
-            sample = self._tabu_sample_to_bqm_sample(list(r.bestSolution()), bqm.binary)
+            init_solution = self._bqm_sample_to_tabu_solution(next(init_sample_generator))
+            r = TabuSearch(qubo, init_solution, tenure, scale_factor, timeout)
+            sample = self._tabu_solution_to_bqm_sample(list(r.bestSolution()), bqm.binary)
             energy = bqm.binary.energy(sample)
             samples.append(sample)
             energies.append(energy)
@@ -155,7 +185,27 @@ class TabuSampler(dimod.Sampler):
         response.change_vartype(bqm.vartype, inplace=True)
         return response
 
-    def _bqm_to_tabu_qubo(self, bqm):
+    @staticmethod
+    def _none_generator(sampleset):
+        for sample in sampleset:
+            yield sample
+        raise ValueError("sample set of initial states depleted")
+
+    @staticmethod
+    def _tile_generator(sampleset):
+        for sample in itertools.cycle(sampleset):
+            yield sample
+
+    @staticmethod
+    def _random_generator(sampleset, bqm):
+        # yield from requires py3
+        for sample in sampleset:
+            yield sample
+        while True:
+            yield TabuSampler._random_sample(bqm)
+
+    @staticmethod
+    def _bqm_to_tabu_qubo(bqm):
         # Note: normally, conversion would be: `ud + ud.T - numpy.diag(numpy.diag(ud))`,
         # but the Tabu solver we're using requires slightly different qubo matrix.
         varorder = sorted(list(bqm.adj.keys()))
@@ -164,17 +214,19 @@ class TabuSampler(dimod.Sampler):
         qubo = symm.tolist()
         return qubo
 
-    def _bqm_sample_to_tabu_sample(self, sample, bqm):
-        assert len(sample) == len(bqm)
-        _, values = zip(*sorted(self._sample_as_dict(sample).items()))
+    @staticmethod
+    def _bqm_sample_to_tabu_solution(sample):
+        _, values = zip(*sorted(TabuSampler._sample_as_dict(sample).items()))
         return list(map(int, values))
 
-    def _tabu_sample_to_bqm_sample(self, sample, bqm):
+    @staticmethod
+    def _tabu_solution_to_bqm_sample(solution, bqm):
         varorder = sorted(list(bqm.adj.keys()))
-        assert len(sample) == len(varorder)
-        return dict(zip(varorder, sample))
+        assert len(solution) == len(varorder)
+        return dict(zip(varorder, solution))
 
-    def _sample_as_dict(self, sample):
+    @staticmethod
+    def _sample_as_dict(sample):
         """Convert list-like ``sample`` (list/dict/dimod.SampleView),
         ``list: var``, to ``map: idx -> var``.
         """
@@ -184,7 +236,8 @@ class TabuSampler(dimod.Sampler):
             sample = enumerate(sample)
         return dict(sample)
 
-    def _random_sample(self, bqm):
+    @staticmethod
+    def _random_sample(bqm):
         values = list(bqm.vartype.value)
         return {i: random.choice(values) for i in bqm.variables}
 
