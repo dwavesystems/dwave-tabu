@@ -87,11 +87,11 @@ class TestTabuSampler(unittest.TestCase):
 
     def test_init_solution_smoketest(self):
         bqm = dimod.BinaryQuadraticModel.from_ising({}, {'ab': -1, 'bc': +1, 'ac': +1})
-        resp = tabu.TabuSampler().sample(bqm, init_solution=tabu.TabuSampler().sample(bqm))
+        resp = tabu.TabuSampler().sample(bqm, initial_states=tabu.TabuSampler().sample(bqm))
         dimod.testing.assert_response_energies(resp, bqm)
 
     def test_init_solution(self):
         bqm = dimod.BinaryQuadraticModel.from_ising({}, {'ab': -1, 'bc': +1, 'ac': +1})
         init = dimod.SampleSet.from_samples({'a': 0, 'b': 0, 'c': 0}, vartype=dimod.BINARY, energy=0)
-        resp = tabu.TabuSampler().sample(bqm, init_solution=init)
+        resp = tabu.TabuSampler().sample(bqm, initial_states=init)
         dimod.testing.assert_response_energies(resp, bqm)
