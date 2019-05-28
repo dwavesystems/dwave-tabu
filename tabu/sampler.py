@@ -17,6 +17,7 @@
 from __future__ import division
 
 import random
+import warnings
 
 import numpy
 import dimod
@@ -50,26 +51,35 @@ class TabuSampler(dimod.Sampler):
                            'init_solution': []}
         self.properties = {}
 
-    def sample(self, bqm, init_solution=None, tenure=None, scale_factor=1, timeout=20, num_reads=1):
-        """Run a tabu search on a given binary quadratic model.
+    def sample(self, bqm, initial_states=None, tenure=None, scale_factor=1,
+               timeout=20, num_reads=1, **kwargs):
+        """Run Tabu search on a given binary quadratic model.
 
         Args:
-            bqm (:obj:`~dimod.BinaryQuadraticModel`):
+            bqm (:class:`~dimod.BinaryQuadraticModel`):
                 The binary quadratic model (BQM) to be sampled.
-            init_solution (:obj:`~dimod.SampleSet`, optional):
+
+            initial_states (:class:`~dimod.SampleSet`, optional, default=None):
                 Single sample that sets an initial state for all the problem variables.
                 Default is a random initial state.
+
+            init_solution (:class:`~dimod.SampleSet`, optional):
+                Deprecated. Alias for `initial_states`.
+
             tenure (int, optional):
                 Tabu tenure, which is the length of the tabu list, or number of recently
                 explored solutions kept in memory.
                 Default is a quarter of the number of problem variables up to
                 a maximum value of 20.
+
             scale_factor (number, optional):
                 Scaling factor for linear and quadratic biases in the BQM. Internally, the BQM is
                 converted to a QUBO matrix, and elements are stored as long ints
                 using ``internal_q = long int (q * scale_factor)``.
+
             timeout (int, optional):
                 Total running time in milliseconds.
+
             num_reads (int, optional): Number of reads. Each run of the tabu algorithm
                 generates a sample.
 
@@ -87,8 +97,14 @@ class TabuSampler(dimod.Sampler):
             >>> samples = sampler.sample(bqm)
             >>> samples.record[0].energy
             -1.0
-
         """
+
+        if 'init_solution' in kwargs:
+            warnings.warn(
+                "`init_solution` is deprecated in favor of `initial_states`.",
+                DeprecationWarning)
+
+        init_solution = kwargs.pop('init_solution', initial_states)
 
         # input checking and defaults calculation
         # TODO: one "read" per sample in init_solution sampleset
