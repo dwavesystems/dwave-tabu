@@ -51,8 +51,8 @@ class TabuSampler(dimod.Sampler):
                            'init_solution': []}
         self.properties = {}
 
-    def sample(self, bqm, initial_states=None, tenure=None, scale_factor=1,
-               timeout=20, num_reads=1, **kwargs):
+    def sample(self, bqm, initial_states=None, num_reads=1, tenure=None,
+               timeout=20, scale_factor=1, **kwargs):
         """Run Tabu search on a given binary quadratic model.
 
         Args:
@@ -63,8 +63,8 @@ class TabuSampler(dimod.Sampler):
                 Single sample that sets an initial state for all the problem variables.
                 Default is a random initial state.
 
-            init_solution (:class:`~dimod.SampleSet`, optional):
-                Deprecated. Alias for `initial_states`.
+            num_reads (int, optional, default=1):
+                Number of reads. Each run of the tabu algorithm generates a sample.
 
             tenure (int, optional):
                 Tabu tenure, which is the length of the tabu list, or number of recently
@@ -72,16 +72,16 @@ class TabuSampler(dimod.Sampler):
                 Default is a quarter of the number of problem variables up to
                 a maximum value of 20.
 
+            timeout (int, optional):
+                Total running time in milliseconds.
+
             scale_factor (number, optional):
                 Scaling factor for linear and quadratic biases in the BQM. Internally, the BQM is
                 converted to a QUBO matrix, and elements are stored as long ints
                 using ``internal_q = long int (q * scale_factor)``.
 
-            timeout (int, optional):
-                Total running time in milliseconds.
-
-            num_reads (int, optional): Number of reads. Each run of the tabu algorithm
-                generates a sample.
+            init_solution (:class:`~dimod.SampleSet`, optional):
+                Deprecated. Alias for `initial_states`.
 
         Returns:
             :obj:`~dimod.SampleSet`: A `dimod` :obj:`.~dimod.SampleSet` object.
