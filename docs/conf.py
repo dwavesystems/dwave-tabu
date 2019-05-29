@@ -55,7 +55,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # Mock the C++ extension
-autodoc_mock_imports = ["tabu.src.tabu_search"]
+autodoc_mock_imports = ["tabu.tabu_search"]
 
 # Load package info, without importing the package
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
