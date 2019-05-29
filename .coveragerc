@@ -1,6 +1,14 @@
 [run]
+# omit virtualenv, test files, C sources, package info
+omit:
+    env/*
+    */tests/*
+    tabu/src/*
+    tabu/package_info.py
 source = tabu
 
 [report]
 exclude_lines:
     pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:
