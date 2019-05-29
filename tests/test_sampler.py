@@ -184,3 +184,22 @@ class TestTabuSampler(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             tabu.TabuSampler().sample(bqm, initial_states_generator='non-existing')
+
+    def test_soft_num_reads(self):
+        """Number of reads adapts to initial_states size, if provided."""
+
+        bqm = dimod.BinaryQuadraticModel.from_ising({}, {'ab': -1, 'bc': 1, 'ac': 1})
+        init = dimod.SampleSet.from_samples_bqm([{'a': 1, 'b': 1, 'c': 1},
+                                                 {'a': -1, 'b': -1, 'c': -1}], bqm)
+
+        # default num_reads == 1
+        self.assertEqual(len(tabu.TabuSampler().sample(bqm)), 1)
+
+        # with initial_states, num_reads == len(initial_states)
+        self.assertEqual(len(tabu.TabuSampler().sample(bqm, initial_states=init)), 2)
+
+        # if explicitly given, with initial_states, they are expanded
+        self.assertEqual(len(tabu.TabuSampler().sample(bqm, initial_states=init, num_reads=3)), 3)
+
+        # if explicitly given, without initial_states, they are generated
+        self.assertEqual(len(tabu.TabuSampler().sample(bqm, num_reads=4)), 4)
