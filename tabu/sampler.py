@@ -62,23 +62,26 @@ class TabuSampler(dimod.Sampler):
                 The binary quadratic model (BQM) to be sampled.
 
             initial_states (:class:`~dimod.SampleSet`, optional, default=None):
-                One or more samples that define the initial states, one per read.
-                If the length of `initial_states` is shorter than `num_reads`,
-                they will be expanded according to `initial_states_generator`.
+                One or more samples, each defining an initial state for all the
+                problem variables. Initial states are given one per read, but
+                if fewer than `num_reads` initial states are defined, additional
+                values are generated as specified by `initial_states_generator`.
 
             initial_states_generator (str, 'none'/'tile'/'random', optional, default='random'):
-                Defines a way `initial_states` of length differing from `num_reads`
-                get used:
+                Defines the expansion of `initial_states` if fewer than
+                `num_reads` are specified:
 
                 * "none":
-                    length must be greater or equal to `num_reads`, otherwise
-                    `ValueError` is raised
+                    If the number of initial states specified is smaller than
+                    `num_reads`, raises ValueError.
+
                 * "tile":
-                    `initial_states` shorter than `num_reads` are repeated, up to
-                    `num_reads` in length. Longer list of states is truncated.
+                    Reuses the specified initial states if fewer than `num_reads`
+                    or truncates if greater.
+
                 * "random":
-                    similar to `tile`, but missing states are selected from a
-                    uniform random state generator.
+                    Expands the specified initial states with randomly generated
+                    states if fewer than `num_reads` or truncates if greater.
 
             num_reads (int, optional, default=1):
                 Number of reads. Each run of the tabu algorithm generates a sample.
