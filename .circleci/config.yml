@@ -62,8 +62,8 @@ jobs:
           name: doctest
           command: |
             . env/bin/activate
-            python setup.py install
             pip install -r docs/requirements.txt
+            python setup.py install
             make -C docs/ doctest
 
       - run: &sdist-build-template
