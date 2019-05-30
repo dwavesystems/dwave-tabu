@@ -15,6 +15,7 @@
 import os
 from io import open
 from setuptools import setup, Extension
+from setuptools.command.build_py import build_py
 
 
 # Load package info, without importing the package
@@ -26,6 +27,14 @@ try:
         exec(f.read(), package_info)
 except SyntaxError:
     execfile(package_info_path, package_info)
+
+
+# Custom build command that runs `build_ext` before `build_py`, so that
+# SWIG-generated modules (in build_ext) are included in package (build_py).
+class build_ext_before_py(build_py):
+    def run(self):
+        self.run_command("build_ext")
+        return build_py.run(self)
 
 
 packages = ['tabu']
@@ -54,6 +63,8 @@ extras_require = {
     'test': ['coverage'],
 }
 
+cmdclass = {'build_py': build_ext_before_py}
+
 setup(
     name=package_info['__packagename__'],
     version=package_info['__version__'],
@@ -63,6 +74,7 @@ setup(
     long_description=open(os.path.join(basedir, 'README.rst'), encoding='utf-8').read(),
     url=package_info['__url__'],
     license=package_info['__license__'],
+    cmdclass=cmdclass,
     ext_modules=ext_modules,
     py_modules=py_modules,
     packages=packages,
