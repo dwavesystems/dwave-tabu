@@ -18,7 +18,3 @@ python:
   install:
     # standard docs requirements
     - requirements: docs/requirements.txt
-
-    # run `python ./setup.py install` and build & install tabu extension
-    - method: setuptools
-      path: .

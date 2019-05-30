@@ -80,4 +80,5 @@ setup(
     packages=packages,
     install_requires=install_requires,
     extras_require=extras_require,
+    zip_safe=False,
 )
