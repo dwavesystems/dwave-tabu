@@ -19,7 +19,6 @@ from io import open
 import os
 import sys
 sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # -- General configuration ------------------------------------------------
 # import sphinx
@@ -53,10 +52,6 @@ source_suffix = ['.rst', '.md']
 
 # The master toctree document.
 master_doc = 'index'
-
-# Mock the C++ extension on RtD (where we can't build_ext)
-if os.getenv('READTHEDOCS'):
-    autodoc_mock_imports = ["tabu.tabu_search"]
 
 # Load package info, without importing the package
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

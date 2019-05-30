@@ -1,0 +1,24 @@
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required
+version: 2
+
+# Build documentation in the docs/ directory with Sphinx
+sphinx:
+  builder: html
+  configuration: docs/conf.py
+
+# build docs in additional formats such as PDF and ePub
+formats: all
+
+# python version and requirements
+python:
+  version: 3.7
+  install:
+    # standard docs requirements
+    - requirements: docs/requirements.txt
+
+    # run `python ./setup.py install` and build & install tabu extension
+    - method: setuptools
+      path: .
