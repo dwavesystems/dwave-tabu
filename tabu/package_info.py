@@ -14,7 +14,7 @@
 
 __packagename__ = 'dwave-tabu'
 __title__ = 'D-Wave Tabu'
-__version__ = '0.1.4'
+__version__ = '0.2.0'
 __author__ = 'D-Wave Systems Inc.'
 __authoremail__ = 'tools@dwavesys.com'
 __description__ = 'Optimized Tabu solver for QUBOs'
