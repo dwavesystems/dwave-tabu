@@ -101,7 +101,7 @@ jobs:
 
   test-osx-3.8: &osx-tests-template
     macos:
-      xcode: "11.1.0"
+      xcode: "11.2.1"
     environment:
       PYTHON: 3.8.0
 
@@ -296,7 +296,7 @@ jobs:
 
   build-osx-3.8: &osx-build-template
     macos:
-      xcode: "11.1.0"
+      xcode: "11.2.1"
     environment:
       PYTHON: 3.8.0
 
