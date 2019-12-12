@@ -40,7 +40,7 @@ jobs:
           command: |
             . env/bin/activate
             python setup.py build_ext --inplace
-        
+
       - run: &run-tests-template
           name: run unittests
           command: |
@@ -70,6 +70,12 @@ jobs:
           command: |
             . env/bin/activate
             python setup.py sdist
+
+      - run: &wheel-build-template
+          name: create bdist_wheel
+          command: |
+            . env/bin/activate
+            python setup.py bdist_wheel
 
       - store_artifacts:
           path: ./dist
@@ -169,6 +175,8 @@ jobs:
       - run: *run-tests-template
 
       - run: *sdist-build-template
+
+      - run: *wheel-build-template
 
       - store_artifacts:
           path: ./dist
@@ -354,12 +362,7 @@ jobs:
 
       - run: *install-package-template
         
-      - run:
-          name: create bdist_wheel
-          command: |
-            . env/bin/activate
-            python setup.py build_ext --inplace
-            python setup.py bdist_wheel
+      - run: *wheel-build-template
 
       - store_artifacts:
           path: ./dist
