@@ -26,14 +26,23 @@ Documentation
   :Release: |version|
   :Date: |today|
 
+.. sdk-start-marker
+
 .. toctree::
   :maxdepth: 1
 
   intro
   reference/index
+
+.. sdk-end-marker
+
+.. toctree::
+  :caption: Code
+  :maxdepth: 1
+
+  Source <https://github.com/dwavesystems/dwave-tabu>
   installation
   license
-  Source <https://github.com/dwavesystems/dwave-tabu>
 
 .. toctree::
   :caption: Ocean Software
