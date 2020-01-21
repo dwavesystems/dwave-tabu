@@ -123,8 +123,6 @@ class TabuSampler(dimod.Sampler):
             -1.0
         """
 
-        if not isinstance(bqm, dimod.BinaryQuadraticModel):
-            raise TypeError("'bqm' should be a 'dimod.BinaryQuadraticModel' instance")
         if not bqm:
             return dimod.SampleSet.from_samples([], energy=0, vartype=bqm.vartype)
 

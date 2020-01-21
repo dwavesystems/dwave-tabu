@@ -155,10 +155,6 @@ class TestTabuSampler(unittest.TestCase):
         bqm = dimod.BinaryQuadraticModel.from_ising({}, {'ab': -1, 'bc': 1, 'ac': 1})
         empty = dimod.BinaryQuadraticModel.empty(dimod.SPIN)
 
-        # invalid bqm
-        with self.assertRaises(TypeError):
-            tabu.TabuSampler().sample({})
-
         # empty bqm
         self.assertEqual(len(tabu.TabuSampler().sample(empty)), 0)
 
