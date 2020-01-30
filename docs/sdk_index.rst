@@ -1,6 +1,6 @@
 .. _sdk_index:
 
-.. include:: /readmes/system.rst
+.. include:: /readmes/tabu.rst
    :start-after: index-start-marker
    :end-before: index-end-marker
 
