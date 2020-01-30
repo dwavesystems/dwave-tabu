@@ -11,7 +11,7 @@ and returns an iterable of samples, in order of increasing energy. A dimod :term
 The :class:`~tabu.TabuSampler` sampler implements the `MST2 multistart tabu search algorithm
 <https://link.springer.com/article/10.1023/B:ANOR.0000039522.58036.68>`_
 for quadratic unconstrained binary optimization (QUBO) problems
-with a :std:doc:`dimod <dimod:index>` Python wrapper.
+with a :std:doc:`dimod <oceandocs:docs_dimod/sdk_index>` Python wrapper.
 
 For a description of the tabu search algorithm, see `tabu search <https://en.wikipedia.org/wiki/Tabu_search>`_\ .
 
