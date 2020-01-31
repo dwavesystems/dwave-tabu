@@ -1,4 +1,4 @@
-.. _sdk_index:
+.. _sdk_index_tabu:
 
 .. include:: /readmes/tabu.rst
    :start-after: index-start-marker
