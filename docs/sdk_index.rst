@@ -1,5 +1,9 @@
 .. _sdk_index_tabu:
 
+==========
+dwave-tabu
+==========
+
 .. include:: /readmes/tabu.rst
    :start-after: index-start-marker
    :end-before: index-end-marker
