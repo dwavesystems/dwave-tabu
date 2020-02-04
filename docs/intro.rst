@@ -18,6 +18,6 @@ For a description of the tabu search algorithm, see `tabu search <https://en.wik
 Example
 =======
 
-.. include:: ../README.rst
+.. include:: README.rst
   :start-after: example-start-marker
   :end-before: example-end-marker
