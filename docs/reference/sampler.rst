@@ -1,4 +1,4 @@
-.. _sampler:
+.. _sampler_tabu:
 
 ===================
 D-Wave Tabu Sampler
