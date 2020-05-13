@@ -173,23 +173,23 @@ class TabuSampler(dimod.Sampler):
         binary_initial_states = initial_states.change_vartype(dimod.BINARY, inplace=False)
         init_sample_generator = _generators[initial_states_generator](binary_initial_states)
 
-        qubo = self._bqm_to_tabu_qubo(bqm.binary)
+        qubo, varorder = self._bqm_to_tabu_qubo(bqm.binary)
 
         # run Tabu search
-        samples = []
-        energies = []
-        for _ in range(num_reads):
-            init_solution = self._bqm_sample_to_tabu_solution(next(init_sample_generator))
+        samples = numpy.empty((num_reads, len(bqm)), dtype=numpy.int8)
+        for ni in range(num_reads):
+            init_solution = self._bqm_sample_to_tabu_solution(next(init_sample_generator), varorder)
             r = TabuSearch(qubo, init_solution, tenure, scale_factor, timeout)
-            sample = self._tabu_solution_to_bqm_sample(list(r.bestSolution()), bqm.binary)
-            energy = bqm.binary.energy(sample)
-            samples.append(sample)
-            energies.append(energy)
+            samples[ni, :] = r.bestSolution()
 
-        response = dimod.SampleSet.from_samples(
-            samples, energy=energies, vartype=dimod.BINARY)
-        response.change_vartype(bqm.vartype, inplace=True)
-        return response
+        if bqm.vartype is dimod.SPIN:
+            samples *= 2
+            samples -= 1
+        elif bqm.vartype is not dimod.BINARY:
+            # sanity check
+            raise ValueError("unknown vartype")
+
+        return dimod.SampleSet.from_samples_bqm((samples, varorder), bqm=bqm)
 
     @staticmethod
     def _none_generator(sampleset):
@@ -217,24 +217,23 @@ class TabuSampler(dimod.Sampler):
 
     @staticmethod
     def _bqm_to_tabu_qubo(bqm):
+        # construct dense matrix representation
+        ldata, (irow, icol, qdata), offset, varorder = bqm.binary.to_numpy_vectors(return_labels=True)
+        ud = numpy.zeros((len(bqm), len(bqm)), dtype=numpy.double)
+        ud[numpy.diag_indices(len(bqm), 2)] = ldata
+        ud[irow, icol] = qdata
+
         # Note: normally, conversion would be: `ud + ud.T - numpy.diag(numpy.diag(ud))`,
         # but the Tabu solver we're using requires slightly different qubo matrix.
-        varorder = sorted(list(bqm.adj.keys()))
-        ud = 0.5 * bqm.to_numpy_matrix(varorder)
+        ud *= .5
         symm = ud + ud.T
         qubo = symm.tolist()
-        return qubo
+        return qubo, varorder
 
     @staticmethod
-    def _bqm_sample_to_tabu_solution(sample):
-        _, values = zip(*sorted(TabuSampler._sample_as_dict(sample).items()))
-        return list(map(int, values))
-
-    @staticmethod
-    def _tabu_solution_to_bqm_sample(solution, bqm):
-        varorder = sorted(list(bqm.adj.keys()))
-        assert len(solution) == len(varorder)
-        return dict(zip(varorder, solution))
+    def _bqm_sample_to_tabu_solution(sample, varorder):
+        sample = TabuSampler._sample_as_dict(sample)
+        return [int(sample[v]) for v in varorder]
 
     @staticmethod
     def _sample_as_dict(sample):
