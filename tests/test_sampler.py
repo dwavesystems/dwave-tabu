@@ -21,6 +21,7 @@ import dimod
 import tabu
 
 
+@dimod.testing.load_sampler_bqm_tests(tabu.TabuSampler)
 class TestTabuSampler(unittest.TestCase):
 
     def test_instantiation(self):
