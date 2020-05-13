@@ -206,7 +206,7 @@ jobs:
           name: Installing gcc and cmake
           command: |
             sudo apt-get update
-            sudo apt-get install -y gcc g++ cmake
+            sudo apt-get install -y --force-yes gcc g++ cmake
 
       - run:
           name: run c++ tests
