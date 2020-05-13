@@ -10,6 +10,8 @@ option(TABU_BUILD_TESTS "Build unit tests." OFF)
 add_library(tabu INTERFACE)
 target_include_directories(tabu INTERFACE ${PROJECT_SOURCE_DIR}/tabu/src)
 
+# gtest requires c++11
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 if(TABU_BUILD_TESTS)
     # Download and unpack googletest at configure time
