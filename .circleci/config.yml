@@ -95,16 +95,6 @@ jobs:
     docker:
       - image: circleci/python:3.5-jessie
 
-  test-3.4:
-    <<: *full-test-template
-    docker:
-      - image: circleci/python:3.4-jessie
-
-  test-2.7:
-    <<: *full-test-template
-    docker:
-      - image: circleci/python:2.7-jessie
-
   test-osx-3.8: &osx-tests-template
     macos:
       xcode: "11.2.1"
@@ -202,20 +192,6 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: 10.9
       HOMEBREW_NO_AUTO_UPDATE: 1
 
-  test-osx-3.4:
-    <<: *osx-tests-template
-    environment:
-      PYTHON: 3.4.8
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-      HOMEBREW_NO_AUTO_UPDATE: 1
-
-  test-osx-2.7:
-    <<: *osx-tests-template
-    environment:
-      PYTHON: 2.7.15
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-      HOMEBREW_NO_AUTO_UPDATE: 1
-
   cpp-tests:
     docker:
       # just use a python image, all we really want is debian
@@ -270,6 +246,7 @@ jobs:
           name: build wheels
           command: |
             for PYBIN in /opt/python/*/bin; do
+              if "${PYBIN}/python" -c "import sys; sys.exit(sys.version_info>=(3, 5))"; then continue; fi;
               "${PYBIN}/pip" install -r requirements.txt
               "${PYBIN}/python" setup.py build_ext --inplace
               "${PYBIN}/python" setup.py bdist_wheel -d ./wheelhouse
@@ -392,20 +369,6 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: 10.9
       HOMEBREW_NO_AUTO_UPDATE: 1
 
-  build-osx-3.4:
-    <<: *osx-build-template
-    environment:
-      PYTHON: 3.4.8
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-      HOMEBREW_NO_AUTO_UPDATE: 1
-
-  build-osx-2.7:
-    <<: *osx-build-template
-    environment:
-      PYTHON: 2.7.15
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-      HOMEBREW_NO_AUTO_UPDATE: 1
-
 workflows:
   version: 2
   test:
@@ -414,14 +377,10 @@ workflows:
       - test-3.7
       - test-3.6
       - test-3.5
-      - test-3.4
-      - test-2.7
       - test-osx-3.8
       - test-osx-3.7
       - test-osx-3.6
       - test-osx-3.5
-      - test-osx-3.4
-      - test-osx-2.7
       - cpp-tests
 
   deploy:
@@ -457,18 +416,6 @@ workflows:
             branches:
               ignore: /.*/
       - build-osx-3.5:
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-osx-3.4:
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-osx-2.7:
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(\.dev([0-9]+)?)?$/
