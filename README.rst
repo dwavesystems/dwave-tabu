@@ -20,10 +20,11 @@ dwave-tabu
 
 .. index-start-marker
 
-An implementation of the `MST2 multistart tabu search algorithm
+A C/C++ implementation of the `MST2 multistart tabu search algorithm
 <https://link.springer.com/article/10.1023/B:ANOR.0000039522.58036.68>`_
-for quadratic unconstrained binary optimization (QUBO) problems
-with a `dimod <https://dimod.readthedocs.io/en/latest/>`_ Python wrapper.
+for quadratic unconstrained binary optimization (QUBO) problems with a
+`dimod sampler <https://docs.ocean.dwavesys.com/en/stable/docs_dimod/reference/sampler_composites/api.html#dimod.Sampler>`_
+Python interface.
 
 .. index-end-marker
 
