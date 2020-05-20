@@ -86,6 +86,11 @@ class TestTabuSampler(unittest.TestCase):
         resp = tabu.TabuSampler().sample(bqm)
         dimod.testing.assert_response_energies(resp, bqm)
 
+    def test_precision(self):
+        qubo = {(0, 0): -0.1}
+        resp = tabu.TabuSampler().sample_qubo(qubo)
+        self.assertEqual(resp.first.energy, -0.1)
+
     def test_initial_states_smoketest(self):
         bqm = dimod.BinaryQuadraticModel.from_ising({}, {'ab': -1, 'bc': 1, 'ac': 1})
         resp = tabu.TabuSampler().sample(bqm, initial_states=tabu.TabuSampler().sample(bqm))
