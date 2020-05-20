@@ -54,7 +54,7 @@ class TabuSampler(dimod.Sampler):
         self.properties = {}
 
     def sample(self, bqm, initial_states=None, initial_states_generator='random',
-               num_reads=None, tenure=None, timeout=20, scale_factor=1, **kwargs):
+               num_reads=None, tenure=None, timeout=20, scale_factor=None, **kwargs):
         """Run Tabu search on a given binary quadratic model.
 
         Args:
@@ -98,10 +98,14 @@ class TabuSampler(dimod.Sampler):
             timeout (int, optional):
                 Total running time in milliseconds.
 
-            scale_factor (number, optional):
-                Scaling factor for linear and quadratic biases in the BQM. Internally, the BQM is
-                converted to a QUBO matrix, and elements are stored as long ints
-                using ``internal_q = long int (q * scale_factor)``.
+            scale_factor (number, optional, default=None/autoscale):
+                Scaling factor for linear and quadratic biases in the BQM.
+                Internally, the BQM is converted to a QUBO matrix, and elements
+                are stored as long ints using ``internal_q = long int (q * scale_factor)``.
+
+                By default (when set to ``None``), scale factor will be computed
+                from the provided BQM (QUBO) to provide the best dynamic range:
+                ``scale_factor = max_int / max(abs(biases))``.
 
             init_solution (:class:`~dimod.SampleSet`, optional):
                 Deprecated. Alias for `initial_states`.
@@ -173,13 +177,16 @@ class TabuSampler(dimod.Sampler):
         binary_initial_states = initial_states.change_vartype(dimod.BINARY, inplace=False)
         init_sample_generator = _generators[initial_states_generator](binary_initial_states)
 
-        qubo, varorder = self._bqm_to_tabu_qubo(bqm.binary)
+        qubo, varorder, maxbias = self._bqm_to_tabu_qubo(bqm.binary)
+
+        if scale_factor is None:
+            scale_factor = 2**31 // max(1, maxbias) - 1
 
         # run Tabu search
         samples = numpy.empty((num_reads, len(bqm)), dtype=numpy.int8)
         for ni in range(num_reads):
             init_solution = self._bqm_sample_to_tabu_solution(next(init_sample_generator), varorder)
-            r = TabuSearch(qubo, init_solution, tenure, scale_factor, timeout)
+            r = TabuSearch(qubo, init_solution, tenure, int(scale_factor), timeout)
             samples[ni, :] = r.bestSolution()
 
         if bqm.vartype is dimod.SPIN:
@@ -228,7 +235,8 @@ class TabuSampler(dimod.Sampler):
         ud *= .5
         symm = ud + ud.T
         qubo = symm.tolist()
-        return qubo, varorder
+        maxbias = max(symm.max(), -symm.min())
+        return qubo, varorder, maxbias
 
     @staticmethod
     def _bqm_sample_to_tabu_solution(sample, varorder):
