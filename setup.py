@@ -67,6 +67,17 @@ extras_require = {
 
 cmdclass = {'build_py': build_ext_before_py}
 
+classifiers = [
+    'License :: OSI Approved :: Apache Software License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+]
+
 setup(
     name=package_info['__packagename__'],
     version=package_info['__version__'],
@@ -76,6 +87,7 @@ setup(
     long_description=open(os.path.join(basedir, 'README.rst'), encoding='utf-8').read(),
     url=package_info['__url__'],
     license=package_info['__license__'],
+    classifiers=classifiers,
     cmdclass=cmdclass,
     ext_modules=ext_modules,
     py_modules=py_modules,
