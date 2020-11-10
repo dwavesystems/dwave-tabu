@@ -1,21 +1,10 @@
-# flexible build system for appveyor as described in:
-# - https://mail.python.org/pipermail/distutils-sig/2014-September/024972.html
-# - https://github.com/ogrisel/python-appveyor-demo
-
 environment:
-  global:
-    # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
-    # /E:ON and /V:ON options are not enabled in the batch script intepreter
-    # See: http://stackoverflow.com/a/13751649/163740
-    CMD_IN_ENV: "cmd /E:ON /V:ON /C .appveyor\\run_with_env.cmd"
-
   # PyPI login
-  username: dwtools
-  password:
+  TWINE_USERNAME: dwtools
+  TWINE_PASSWORD:
     secure: 9/YAQhmz9Kb1ZeXzhBYeQA==
 
   matrix:
-
     - PYTHON: "C:\\Python35"
       PYTHON_VERSION: "3.5.x"
       PYTHON_ARCH: "32"
@@ -48,63 +37,44 @@ environment:
       PYTHON_VERSION: "3.8.x"
       PYTHON_ARCH: "64"
 
+    - PYTHON: "C:\\Python39"
+      PYTHON_VERSION: "3.9.x"
+      PYTHON_ARCH: "32"
+
+    - PYTHON: "C:\\Python39-x64"
+      PYTHON_VERSION: "3.9.x"
+      PYTHON_ARCH: "64"
+
 install:
-  # If there is a newer build queued for the same PR, cancel this one.
-  # The AppVeyor 'rollout builds' option is supposed to serve the same
-  # purpose but it is problematic because it tends to cancel builds pushed
-  # directly to master instead of just PR builds (or the converse).
-  # credits: JuliaLang developers.
-  - ps: if ($env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_BUILD_NUMBER -ne ((Invoke-RestMethod `
-        https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
-        Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
-          throw "There are newer queued builds for this pull request, failing early." }
-  - ECHO "Filesystem root:"
-  - ps: "ls \"C:/\""
-
-  - ECHO "Installed SDKs:"
-  - ps: "ls \"C:/Program Files/Microsoft SDKs/Windows\""
-
-  # Install Python (from the official .msi of https://python.org) and pip when
-  # not already installed.
-  - ps: if (-not(Test-Path($env:PYTHON))) { & .appveyor\install.ps1 }
-
-  # Prepend newly installed Python to the PATH of this build (this cannot be
-  # done from inside the powershell script as it would require to restart
-  # the parent CMD process).
-  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  # required to link py35 (x86 and x64)
+  - set PATH=%PATH%;C:\Program Files (x86)\Windows Kits\8.1\bin\x86
 
   # Check that we have the expected version and architecture for Python
-  - "python --version"
-  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
-  - "python -c \"import platform; print(platform.machine())\""
+  - "%PYTHON%\\python.exe --version"
+  - "%PYTHON%\\python.exe -c \"import struct; print(struct.calcsize('P') * 8)\""
+  - "%PYTHON%\\python.exe -c \"import platform; print(platform.machine())\""
 
   # Upgrade to the latest version of pip to avoid it displaying warnings
   # about it being out of date.
-  - "python -m pip install --upgrade pip"
+  - "%PYTHON%\\python.exe -m pip install --upgrade pip setuptools"
 
-  # Install package build requirements
-  - "%CMD_IN_ENV% python -m pip install wheel"
+  # Install dependencies
+  - "%PYTHON%\\python.exe -m pip install -r requirements.txt -r tests\\requirements.txt"
+  - "%PYTHON%\\python.exe -m pip install wheel twine"
 
-  # Install the build dependencies of the project. If some dependencies contain
-  # compiled extensions and are not provided as pre-built wheel packages,
-  # pip will build them from source using the MSVC compiler matching the
-  # target Python version and architecture
-  - "%CMD_IN_ENV% pip install -r requirements.txt"
-  - "%CMD_IN_ENV% choco install -y --no-progress -r swig --version 3.0.12"
+  # Install the build dependencies
+  - "choco.exe install -y --no-progress -r swig --version 3.0.12"
 
 build_script:
   # Build the compiled extension
-  - "%CMD_IN_ENV% python setup.py build_ext --inplace"
-
-before_test:
-  - "%CMD_IN_ENV% python -m pip install -r tests\\requirements.txt"
+  - "%PYTHON%\\python.exe setup.py build_ext --inplace"
 
 test_script:
-  - "%CMD_IN_ENV% python -m unittest discover"
+  - "%PYTHON%\\python.exe -m unittest discover"
 
 after_test:
   # If tests are successful, create binary packages for the project.
-  - "%CMD_IN_ENV% python setup.py bdist_wheel"
+  - "%PYTHON%\\python.exe setup.py bdist_wheel"
   - ps: "ls dist"
 
 artifacts:
@@ -112,8 +82,4 @@ artifacts:
   - path: dist\*
 
 deploy_script:
-  - "echo [pypi] > %USERPROFILE%\\.pypirc"
-  - "echo username: %username% >> %USERPROFILE%\\.pypirc"
-  - "echo password: %password% >> %USERPROFILE%\\.pypirc"
-  - "%CMD_IN_ENV% python -m pip install twine"
-  - cmd: "if [%APPVEYOR_REPO_TAG%]==[true] %CMD_IN_ENV% twine upload --skip-existing dist\\*.whl"
+  - cmd: "if [%APPVEYOR_REPO_TAG%]==[true] %PYTHON%\\Scripts\\twine upload --skip-existing dist\\*.whl"
