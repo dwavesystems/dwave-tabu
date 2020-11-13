@@ -47,14 +47,13 @@ class TabuSampler(dimod.Sampler):
 
     def __init__(self):
         self.parameters = {'tenure': [],
-                           'scale_factor': [],
                            'timeout': [],
                            'num_reads': [],
                            'init_solution': []}
         self.properties = {}
 
     def sample(self, bqm, initial_states=None, initial_states_generator='random',
-               num_reads=None, tenure=None, timeout=20, scale_factor=1, **kwargs):
+               num_reads=None, tenure=None, timeout=20, **kwargs):
         """Run Tabu search on a given binary quadratic model.
 
         Args:
@@ -97,11 +96,6 @@ class TabuSampler(dimod.Sampler):
 
             timeout (int, optional):
                 Total running time in milliseconds.
-
-            scale_factor (number, optional):
-                Scaling factor for linear and quadratic biases in the BQM. Internally, the BQM is
-                converted to a QUBO matrix, and elements are stored as long ints
-                using ``internal_q = long int (q * scale_factor)``.
 
             init_solution (:class:`~dimod.SampleSet`, optional):
                 Deprecated. Alias for `initial_states`.
@@ -179,7 +173,7 @@ class TabuSampler(dimod.Sampler):
         samples = numpy.empty((num_reads, len(bqm)), dtype=numpy.int8)
         for ni in range(num_reads):
             init_solution = self._bqm_sample_to_tabu_solution(next(init_sample_generator), varorder)
-            r = TabuSearch(qubo, init_solution, tenure, scale_factor, timeout)
+            r = TabuSearch(qubo, init_solution, tenure, timeout)
             samples[ni, :] = r.bestSolution()
 
         if bqm.vartype is dimod.SPIN:
