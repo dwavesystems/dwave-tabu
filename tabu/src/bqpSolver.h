@@ -35,7 +35,7 @@ typedef struct bqpSolver_Callback {
  * Solves a BQP using simple tabu search heuristic
  * \param bqp: BQP problem to be solved
  * \param starting: A starting solution
- * \param ZCoeff: A parameter that defines the number of iterations
+ * \param ZCoeff: Parameter used to define the max number of iterations
  * \param timLimitInMilliSecs: time limit in milli seconds
  * \return best solution found
  */
@@ -74,7 +74,7 @@ void bqpSolver_selectVariables(BQP *bqp, int n, double **C, int *I);
 /**
  * Helper function to bqpSolver_multiStartTabooSearch() function
  * Uses steepest ascent to construct a new solution
- * \param solution: Old solution
+ * \param solution: solution to be updated
  * \param bqp: BQP problem to be solved
  * \param C: C matrix (refer paper for multi start tabu search by Palubeckis)
  * \param I: selected variables
@@ -84,7 +84,7 @@ void bqpSolver_selectVariables(BQP *bqp, int n, double **C, int *I);
 void bqpSolver_steepestAscent(int *solution, BQP *bqp, double **C, int *I, int n);
 
 /**
- * Compute the C matrix (refer to the tabu search heuristic in the paper by Palubeckis
+ * Compute the C matrix (refer to the tabu search heuristic in the paper by Palubeckis (p.262))
  * \param C: the matrix computed
  * \param bqp: the BQP
  * \param solution: current solution
