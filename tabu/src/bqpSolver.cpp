@@ -13,6 +13,7 @@
 //  limitations under the License.
 
 #include <vector>
+#include <limits>
 #include "bqpSolver.h"
 
 using std::vector;
