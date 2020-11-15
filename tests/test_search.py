@@ -71,10 +71,9 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         qubo = [[1]]
         init = [1]
         tenure = len(init) - 1
-        scale = 1
         timeout = 1
 
-        search = tabu.TabuSearch(qubo, init, tenure, scale, timeout)
+        search = tabu.TabuSearch(qubo, init, tenure, timeout)
 
         solution = list(search.bestSolution())
         energy = search.bestEnergy()
@@ -86,10 +85,9 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         qubo = [[2, 1, 1], [1, 2, 1], [1, 1, 2]]
         init = [1, 1, 1]
         tenure = len(init) - 1
-        scale = 1
         timeout = 20
 
-        search = tabu.TabuSearch(qubo, init, tenure, scale, timeout)
+        search = tabu.TabuSearch(qubo, init, tenure, timeout)
 
         solution = list(search.bestSolution())
         energy = search.bestEnergy()
@@ -100,7 +98,7 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
     def test_concurrency(self):
 
         def search(timeout):
-            return tabu.TabuSearch([[1]], [1], 0, 1, timeout).bestEnergy()
+            return tabu.TabuSearch([[1]], [1], 0, timeout).bestEnergy()
 
         with ThreadPoolExecutor(max_workers=3) as executor:
 
