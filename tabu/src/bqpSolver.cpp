@@ -151,16 +151,16 @@ double bqpSolver_localSearchInternal(BQP *bqp, int *starting, double startingObj
     bqp->solutionQuality = startingObjective;
     do {
         improved = 0;
-        for(i = 0; i < bqp->nVars; i++, iter++) {
+        for (i = 0; i < bqp->nVars; i++, iter++) {
             bqp->evalNum++; /*added to record more statistics.*/
-            if(changeInObjective[i] < 0) {
+            if (changeInObjective[i] < 0) {
                 bqp->solution[i] = 1 - bqp->solution[i];
                 bqp->solutionQuality = bqp->solutionQuality + changeInObjective[i];
                 improved = 1;
                 changeInObjective[i] = -changeInObjective[i];
-                for(j = 0; j < bqp->nVars; j++) {
-                    change = bqp->Q[i][j] + bqp->Q[j][i];
-                    if(change && (j ^ i)) {
+                for (j = 0; j < bqp->nVars; j++) {
+                    if (j != i) {
+                        change = bqp->Q[i][j] + bqp->Q[j][i];
                         changeInObjective[j] += (bqp->solution[j] ^ bqp->solution[i])? change : -change;
                     }
                 }
