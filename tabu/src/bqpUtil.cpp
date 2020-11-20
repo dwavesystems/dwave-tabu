@@ -53,12 +53,15 @@ void bqpUtil_print(const BQP *bqp) {
 }
 
 double bqpUtil_getChangeInObjective(const BQP *bqp, const vector<int> &oldSolution, int flippedBit) {
-    double change = (oldSolution[flippedBit] == 1)? (-1 * bqp->Q[flippedBit][flippedBit]) : bqp->Q[flippedBit][flippedBit];  
+    bool changed = oldSolution[flippedBit] != 1;
+
+    double inc = bqp->Q[flippedBit][flippedBit];
+    double change = (changed)? inc : -inc;  
 
     for (int i = bqp->nVars; i--;) {
         if ((oldSolution[i] == 1) && (i != flippedBit)) {
-            double inc = bqp->Q[flippedBit][i] + bqp->Q[i][flippedBit];
-            change += (oldSolution[flippedBit] ^ 1) ?  inc : -inc;
+            inc = bqp->Q[flippedBit][i] + bqp->Q[i][flippedBit];
+            change += (changed)?  inc : -inc;
         }
     }
     return change;
@@ -79,8 +82,7 @@ double bqpUtil_getObjective(const BQP *bqp, const vector<int> &solution) {
 
 double bqpUtil_getObjectiveIncremental(const BQP *bqp, const vector<int> &solution, const vector<int> &oldSolution, double oldCost) {
     double cost = oldCost;
-    vector<int> oldSolCopy(bqp->nVars);
-    oldSolCopy = oldSolution;
+    vector<int> oldSolCopy(oldSolution.begin(), oldSolution.end());
 
     for (int i = bqp->nVars; i--;) {
         if (solution[i] != oldSolCopy[i]) {

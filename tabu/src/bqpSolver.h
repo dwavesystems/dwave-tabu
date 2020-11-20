@@ -55,25 +55,25 @@ double bqpSolver_localSearchInternal(BQP *bqp, const std::vector<int> &starting,
 /**
  * Helper function to bqpSolver_multiStartTabooSearch() function
  * Selects variables to change and build up new solution
- * \param bqp: BQP problem to be solved
+ * \param numVars: number of variables in the BQP
  * \param numSelection: number of variables required to be selected
  * \param C: C matrix (refer paper for multi start tabu search by Palubeckis)
  * \param I: storage for selected variables
  * \return 
  */
-void bqpSolver_selectVariables(BQP *bqp, int numSelection, std::vector<std::vector<double>> &C, std::vector<int> &I);
+void bqpSolver_selectVariables(int numVars, int numSelection, std::vector<std::vector<double>> &C, std::vector<int> &I);
 
 /**
  * Helper function to bqpSolver_multiStartTabooSearch() function
  * Uses steepest ascent to construct a new solution
  * \param solution: solution to be updated
- * \param bqp: BQP problem to be solved
+ * \param numVars: number of variables in the BQP
  * \param C: C matrix (refer paper for multi start tabu search by Palubeckis)
  * \param I: selected variables
  * \param n: number of variables required to be selected
  * \return 
  */
-void bqpSolver_steepestAscent(std::vector<int> &solution, BQP *bqp, std::vector<std::vector<double>> &C, std::vector<int> &I, int n);
+void bqpSolver_steepestAscent(std::vector<int> &solution, int numVars, std::vector<std::vector<double>> &C, std::vector<int> &I, int n);
 
 /**
  * Compute the C matrix (refer to the tabu search heuristic in the paper by Palubeckis (p.262))
@@ -82,7 +82,7 @@ void bqpSolver_steepestAscent(std::vector<int> &solution, BQP *bqp, std::vector<
  * \param solution: current solution
  * \return void
  */
-void bqpSolver_computeC(std::vector<std::vector<double>> &C, BQP *bqp, const std::vector<int> &solution);
+void bqpSolver_computeC(std::vector<std::vector<double>> &C, const BQP *bqp, const std::vector<int> &solution);
 
 /**
  * Simple tabu search solver with multi starts
