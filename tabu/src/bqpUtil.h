@@ -24,36 +24,36 @@
 #include <vector>
 
 /**
- * structure to represent a BQP
+ * Structure to represent a BQP
  * Q: the Q matrix
  * nVars: number of variables
- * solution: array fo size nVars where every entry is 0 or 1. current solution.
+ * solution: array of size nVars where every entry is 0 or 1. current solution.
  * solutionQuality: objective function value at solution
  * nIterations: number of iterations required to arrive at this solution
  */
 typedef struct {
-	std::vector<std::vector<long> >Q;
+	std::vector<std::vector<double> > Q;
 	int nVars;
 	std::vector<int> solution;
-	long solutionQuality;
+	double solutionQuality;
 	unsigned long long nIterations;
 	/*added to record more statistics.*/
 	unsigned long long restartNum;
 	unsigned long long iterNum;
 	unsigned long long evalNum;
-	long upperBound;
+	double upperBound;
 } BQP;
 
 
 /**
- * gets the maximum abs(Q[i][j]) in a bqp
+ * Gets the maximum abs(Q[i][j]) in a bqp
  * @param bqp
  * @return maximum Q[i][j]
  */
-long bqpUtil_getMaxBQPCoeff(BQP *bqp);
+double bqpUtil_getMaxBQPCoeff(BQP *bqp);
 
 /**
- * converts a generic bqp Q matrix into upper trianglular using:
+ * Converts a generic bqp Q matrix into upper triangular using:
  * Q[i][j] = Q[i][j] + Q[j][i] for all i < j
  * @param bqp
  * @return void
@@ -68,14 +68,14 @@ void bqpUtil_convertBQPToUpperTriangular(BQP *bqp);
 void bqpUtil_print(BQP *bqp);
 
 /**
- * Compute the value by which the ovjective function is changed if
+ * Compute the value by which the objective function is changed if
  * exactly one bit in the solution is flipped
  * @param bqp: the BQP
  * @param oldSolution: current solution
  * @param flippedBit: the bit that is flipped
  * @return change in objective
  */
-long bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit);
+double bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit);
 
 /**
  * Computes the value of objective function of a BQP for a given solution
@@ -83,21 +83,21 @@ long bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit);
  * @param solution: given solution
  * @return value of objective function
  */
-long bqpUtil_getObjective(BQP *bqp, int * solution);
+double bqpUtil_getObjective(BQP *bqp, int * solution);
 
 /**
  * Computes the value of objective function of a BQP for a given solution,
  * given some old solution.
- * If an old solution and the objective function value for that old soltuion
+ * If an old solution and the objective function value for that old solution
  * is known, then we can calculate the objective for the new solution quicker
- * by building up on the old soltuion.
+ * by building up on the old solution.
  * @param bqp: the BQP
  * @param solution: new solution
  * @param oldSolution: old solution
  * @param oldCost: value of objective function at old solution
  * @return value ot objective function at new solution
  */
-long bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, long oldCost);
+double bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, double oldCost);
 
 /**
  * Initialize the current solution in a BQP to all zeros
@@ -127,14 +127,14 @@ void bqpUtil_free(BQP *bqp);
  */
 void bqpUtil_printSolution(BQP *bqp);
 
-// replacement for vector.data() in ancient compilers not supporting it (VS2008, aka VS9)
+// Replacement for vector.data() in ancient compilers not supporting it (VS2008, aka VS9)
 // NB: we need to support VS9 is we want to build for python2.7 on windows
 template<typename T>
 T* vector_data(std::vector<T>& v) {
     return v.size() ? &v[0] : NULL;
 }
 
-// high-precision per-thread monotonic clock value expressed in milliseconds
+// High-precision per-thread monotonic clock value expressed in milliseconds
 long long realtime_clock();
 
 #endif
