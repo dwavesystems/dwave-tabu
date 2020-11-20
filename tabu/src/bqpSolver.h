@@ -53,15 +53,6 @@ double bqpSolver_tabooSearch(BQP *bqp, const std::vector<int> &starting, double 
 double bqpSolver_localSearchInternal(BQP *bqp, const std::vector<int> &starting, double startingObjective, std::vector<double> &changeInObjective);
 
 /**
- * Solves a BQP using basic local searching (wrapper for localSearchInternal)
- * A wrapper to the bqpSolver_localSearchInternal() function
- * \param bqp: BQP problem to be solved
- * \param starting: A starting solution
- * \return best solution found
- */
-double bqpSolver_localSearch(BQP *bqp, const std::vector<int> &starting);
-
-/**
  * Helper function to bqpSolver_multiStartTabooSearch() function
  * Selects variables to change and build up new solution
  * \param bqp: BQP problem to be solved
@@ -70,7 +61,7 @@ double bqpSolver_localSearch(BQP *bqp, const std::vector<int> &starting);
  * \param I: storage for selected variables
  * \return 
  */
-void bqpSolver_selectVariables(BQP *bqp, int numSelection, std::vector<std::vector<double> > &C, std::vector<int> &I);
+void bqpSolver_selectVariables(BQP *bqp, int numSelection, std::vector<std::vector<double>> &C, std::vector<int> &I);
 
 /**
  * Helper function to bqpSolver_multiStartTabooSearch() function
@@ -82,7 +73,7 @@ void bqpSolver_selectVariables(BQP *bqp, int numSelection, std::vector<std::vect
  * \param n: number of variables required to be selected
  * \return 
  */
-void bqpSolver_steepestAscent(std::vector<int> &solution, BQP *bqp, std::vector<std::vector<double> > &C, std::vector<int> &I, int n);
+void bqpSolver_steepestAscent(std::vector<int> &solution, BQP *bqp, std::vector<std::vector<double>> &C, std::vector<int> &I, int n);
 
 /**
  * Compute the C matrix (refer to the tabu search heuristic in the paper by Palubeckis (p.262))
@@ -91,7 +82,7 @@ void bqpSolver_steepestAscent(std::vector<int> &solution, BQP *bqp, std::vector<
  * \param solution: current solution
  * \return void
  */
-void bqpSolver_computeC(std::vector<std::vector<double> > &C, BQP *bqp, const std::vector<int> &solution);
+void bqpSolver_computeC(std::vector<std::vector<double>> &C, BQP *bqp, const std::vector<int> &solution);
 
 /**
  * Simple tabu search solver with multi starts
@@ -101,37 +92,5 @@ void bqpSolver_computeC(std::vector<std::vector<double> > &C, BQP *bqp, const st
  * \return best solution found
  */
 double bqpSolver_multiStartTabooSearch(BQP *bqp, long long timeLimitInMilliSecs, int numStarts, int tabuTenure, const std::vector<int> &initSolution, const bqpSolver_Callback *callback);
-
-/**
- * Exhaustive solver (takes too long for problems with more than 20 variables)
- * \param bqp: BQP problem to be solved
- * \return 
- */
-int bqpSolver_naiveSearch(BQP *bqp);
-
-/**
- * Another version for bqpSolver_localSearchInternal() function
- * In this version some variables are restricted and you are not allowed to flip them
- * \param bqp: BQP problem to be solved
- * \param starting: A starting solution
- * \param restricted: Tells if a variable is restricted or not
- * \param startingObjective: The objective function value for the starting solution
- * \param changeInObjective: Partial derivative values for the starting solution
- * \return best solution found
- */
-double bqpSolver_restrictedLocalSearchInternal(BQP *bqp, const std::vector<int> &starting, const std::vector<int> &restricted, double startingObjective, std::vector<double> &changeInObjective);
-
-/**
- * Another version to bqpSolver_localSearch() function
- * A wrapper to the bqpSolver_restrictedLocalSearchInternal() function
- * \param bqp: BQP problem to be solved
- * \param starting: A starting solution
- * \param restricted: Tells if a variable is restricted or not
- * \return best solution found
- */
-double bqpSolver_restrictedLocalSearch(BQP *bqp, const std::vector<int> &starting, const std::vector<int> &restricted);
-
-
-
 
 #endif

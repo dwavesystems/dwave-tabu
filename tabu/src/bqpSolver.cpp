@@ -166,17 +166,7 @@ double bqpSolver_localSearchInternal(BQP *bqp, const vector<int> &starting, doub
     return bqp->solutionQuality;
 }
 
-// not currently used
-double bqpSolver_localSearch(BQP *bqp, const vector<int> &starting) {
-    vector<double> changeInObjective(bqp->nVars);
-    for (int i = 0; i < bqp->nVars; i++) {
-        changeInObjective[i] = bqpUtil_getChangeInObjective(bqp, starting, i);
-    }
-    bqpSolver_localSearchInternal(bqp, starting, bqpUtil_getObjective(bqp, starting), changeInObjective);
-    return bqp->solutionQuality;
-}
-
-void bqpSolver_selectVariables(BQP *bqp, int numSelection, vector<vector<double> > &C, vector<int> &I) {
+void bqpSolver_selectVariables(BQP *bqp, int numSelection, vector<vector<double>> &C, vector<int> &I) {
     int i, ctr;
     vector<double> d(bqp->nVars);   // estimate used to calculate e
     for (i = 0; i < bqp->nVars; i++) {
@@ -272,7 +262,7 @@ void bqpSolver_selectVariables(BQP *bqp, int numSelection, vector<vector<double>
     }
 }
 
-void bqpSolver_steepestAscent(vector<int> &solution, BQP *bqp, vector<vector<double> > &C, vector<int> &I, int n) {
+void bqpSolver_steepestAscent(vector<int> &solution, BQP *bqp, vector<vector<double>> &C, vector<int> &I, int n) {
     int i, j, ctr;
     int idI, idJ, r, v = 0;
     vector<double> h1(bqp->nVars);
@@ -337,7 +327,7 @@ void bqpSolver_steepestAscent(vector<int> &solution, BQP *bqp, vector<vector<dou
     }
 }
 
-void bqpSolver_computeC(vector<vector<double> > &C, BQP *bqp, const vector<int> &solution) {
+void bqpSolver_computeC(vector<vector<double>> &C, BQP *bqp, const vector<int> &solution) {
     for (int i = 0; i < bqp->nVars; i++) {
         C[i][i] = -bqp->Q[i][i];
         for (int j = i + 1; j < bqp->nVars; j++) {
@@ -362,7 +352,7 @@ double bqpSolver_multiStartTabooSearch(
     long long startTime = realtime_clock();
     int i;
     long iter;
-    vector<vector<double> > C(bqp->nVars);
+    vector<vector<double>> C(bqp->nVars);
     vector<int> I(bqp->nVars); // will store set of variables to apply steepest ascent to
     vector<int> solution(bqp->nVars);
     vector<int> bestSolution(bqp->nVars);
@@ -423,100 +413,5 @@ double bqpSolver_multiStartTabooSearch(
     bqp->solutionQuality = bestSolutionQuality;
     bqp->solution = bestSolution;
 
-    return bqp->solutionQuality;
-}
-
-// not currently used
-int bqpSolver_naiveSearch(BQP *bqp) {
-    int i;
-    unsigned long long num, grayNum;
-    double cost, prevCost, minCost;
-    int flippedBit;
-    vector<int> solution(bqp->nVars);
-    vector<int> prevSolution(bqp->nVars);
-    if(bqp->nVars > 64) {
-        bqpUtil_randomizeBQPSolution(bqp);
-        return bqp->solutionQuality;
-    }
-    for(i = 0; i < bqp->nVars; i++) {
-        prevSolution[i] = 0;
-        bqp->solution[i] = 0;
-    }
-    bqp->nIterations = (long)pow(2.0, bqp->nVars);
-    prevCost = 0;
-    minCost = 0;
-    for(num = 1; num < bqp->nIterations; num++) {
-        grayNum = num ^ (num >> 1);
-        for(i = 0; i < bqp->nVars; i++) {
-            solution[i] = 0;
-        }
-        for(i = 0; grayNum != 0 && i < bqp->nVars; i++) {
-            solution[i] = (int)(grayNum & 1);
-            grayNum = grayNum >> 1;
-        }
-        flippedBit = -1;
-        for(i = 0; i < bqp->nVars; i++) {
-            if(solution[i] != prevSolution[i]) {
-                flippedBit = i;
-                break;
-            }
-        }
-        cost = prevCost + bqpUtil_getChangeInObjective(bqp, prevSolution, flippedBit);
-        prevCost = cost;
-        prevSolution[flippedBit] = solution[flippedBit];
-
-        if(minCost >= cost) {
-            minCost = cost;
-            for(i = 0; i < bqp->nVars; i++) {
-                bqp->solution[i] = solution[i];
-            }
-            bqp->solutionQuality = minCost;
-        }
-    }
-    return bqp->solutionQuality;
-}
-
-// not currently used
-double bqpSolver_restrictedLocalSearchInternal(BQP *bqp, const vector<int> &starting, const vector<int> &restricted, double startingObjective, vector<double> &changeInObjective) {
-    int i, j;
-    long long iter = 0;
-    double objective, change;
-    int improved;
-    for(i = 0; i < bqp->nVars; i++) {
-        bqp->solution[i] = starting[i];
-    }
-    bqp->solutionQuality = startingObjective;
-    do {
-        improved = 0;
-        for(i = 0; i < bqp->nVars; i++, iter++) {
-            if(restricted[i] == 1) {
-                continue;
-            }
-            objective = bqp->solutionQuality + changeInObjective[i];
-            if(objective < bqp->solutionQuality) {
-                bqp->solution[i] = 1 - bqp->solution[i];
-                bqp->solutionQuality = objective;
-                improved = 1;
-                changeInObjective[i] = -changeInObjective[i];
-                for(j = 0; j < bqp->nVars; j++) {
-                    change = bqp->Q[i][j] + bqp->Q[j][i];
-                    if(change && (j ^ i)) {
-                        changeInObjective[j] += (bqp->solution[j] ^ bqp->solution[i])? change : -change;
-                    }
-                }
-            }
-        }
-    } while(improved);
-    bqp->nIterations = iter;
-    return bqp->solutionQuality;
-}
-
-// not currently used
-double bqpSolver_restrictedLocalSearch(BQP *bqp, const vector<int> &starting, const vector<int> &restricted) {
-    vector<double> changeInObjective(bqp->nVars);
-    for (int i = 0; i < bqp->nVars; i++) {
-        changeInObjective[i] = bqpUtil_getChangeInObjective(bqp, starting, i);
-    }
-    bqpSolver_restrictedLocalSearchInternal(bqp, starting, restricted, bqpUtil_getObjective(bqp, starting), changeInObjective);
     return bqp->solutionQuality;
 }

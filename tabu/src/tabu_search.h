@@ -16,13 +16,12 @@
 #define __TABU_SEARCH_H__
 
 #include <vector>
-#include <map>
 #include "bqpUtil.h"
 
 class TabuSearch
 {
     public:
-        TabuSearch(std::vector<std::vector<double> > Q, std::vector<int> initSol, int tenure, long int timeout);
+        TabuSearch(std::vector<std::vector<double>> Q, std::vector<int> initSol, int tenure, long int timeout);
         double bestEnergy();
         std::vector<int> bestSolution();
 
