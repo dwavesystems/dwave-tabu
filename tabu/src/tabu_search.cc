@@ -12,9 +12,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "common.h"
-#include <limits>
 #include "tabu_search.h"
+
+#include <limits>
+
+#include "common.h"
 #include "bqpSolver.h"
 
 using std::vector;
@@ -53,13 +55,13 @@ TabuSearch::TabuSearch(vector<vector<double> > Q, vector<int> initSol, int tenur
     }
     bqp.solution.resize(nvars);
     bqp.solutionQuality = 0;
-    bqpSolver_multiStartTabooSearch(&bqp, timeout, 1000000, tenure, vector_data<int>(initSol), NULL);
+    bqpSolver_multiStartTabooSearch(&bqp, timeout, 1000000, tenure, initSol, nullptr);
 }
 
 
 double TabuSearch::bestEnergy()
 {
-    return bqpUtil_getObjective(&bqp, vector_data<int>(bqp.solution));
+    return bqpUtil_getObjective(&bqp, bqp.solution);
 }
 
 vector<int> TabuSearch::bestSolution()

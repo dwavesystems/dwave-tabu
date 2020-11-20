@@ -103,11 +103,11 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         with ThreadPoolExecutor(max_workers=3) as executor:
 
             # ~ 500 ms (but be gracious on slow CI VMs)
-            with self.assertRuntimeWithin(400, 1400):
+            with self.assertRuntimeWithin(400, 1600):
                 wait([executor.submit(search, timeout=500) for _ in range(3)])
 
             # ~ 1000 ms (but be gracious on slow CI VMs)
-            with self.assertRuntimeWithin(900, 1900):
+            with self.assertRuntimeWithin(900, 2100):
                 wait([executor.submit(search, timeout=500) for _ in range(4)])
 
     def test_float(self):

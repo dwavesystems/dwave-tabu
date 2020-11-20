@@ -50,7 +50,7 @@ typedef struct {
  * @param bqp
  * @return maximum Q[i][j]
  */
-double bqpUtil_getMaxBQPCoeff(BQP *bqp);
+double bqpUtil_getMaxBQPCoeff(const BQP *bqp);
 
 /**
  * Converts a generic bqp Q matrix into upper triangular using:
@@ -65,7 +65,7 @@ void bqpUtil_convertBQPToUpperTriangular(BQP *bqp);
  * @param bqp: BQP to be printed
  * @return void
  */
-void bqpUtil_print(BQP *bqp);
+void bqpUtil_print(const BQP *bqp);
 
 /**
  * Compute the value by which the objective function is changed if
@@ -75,7 +75,7 @@ void bqpUtil_print(BQP *bqp);
  * @param flippedBit: the bit that is flipped
  * @return change in objective
  */
-double bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit);
+double bqpUtil_getChangeInObjective(const BQP *bqp, const std::vector<int> &oldSolution, int flippedBit);
 
 /**
  * Computes the value of objective function of a BQP for a given solution
@@ -83,7 +83,7 @@ double bqpUtil_getChangeInObjective(BQP *bqp, int *oldSolution, int flippedBit);
  * @param solution: given solution
  * @return value of objective function
  */
-double bqpUtil_getObjective(BQP *bqp, int * solution);
+double bqpUtil_getObjective(const BQP *bqp, const std::vector<int> &solution);
 
 /**
  * Computes the value of objective function of a BQP for a given solution,
@@ -97,14 +97,14 @@ double bqpUtil_getObjective(BQP *bqp, int * solution);
  * @param oldCost: value of objective function at old solution
  * @return value ot objective function at new solution
  */
-double bqpUtil_getObjectiveIncremental(BQP *bqp, int *solution, int *oldSolution, double oldCost);
+double bqpUtil_getObjectiveIncremental(const BQP *bqp, const std::vector<int> &solution, const std::vector<int> &oldSolution, double oldCost);
 
 /**
  * Initialize the current solution in a BQP to all zeros
  * @param bqp: the BQP
  * @return void
  */
-void bqpUtil_initBQPSolution(BQP *bqp, const int *initSolution);
+void bqpUtil_initBQPSolution(BQP *bqp, const std::vector<int> &initSolution);
 
 /**
  * Initialize the current solution in a BQP randomly
@@ -114,25 +114,11 @@ void bqpUtil_initBQPSolution(BQP *bqp, const int *initSolution);
 void bqpUtil_randomizeBQPSolution(BQP *bqp);
 
 /**
- * Free BQP. De-allocate Q and solution matrices
- * @param bqp: the BQP
- * @return void
- */
-void bqpUtil_free(BQP *bqp);
-
-/**
  * Print the current solution of BQP
  * @param bqp: the BQP
  * @return void
  */
-void bqpUtil_printSolution(BQP *bqp);
-
-// Replacement for vector.data() in ancient compilers not supporting it (VS2008, aka VS9)
-// NB: we need to support VS9 is we want to build for python2.7 on windows
-template<typename T>
-T* vector_data(std::vector<T>& v) {
-    return v.size() ? &v[0] : NULL;
-}
+void bqpUtil_printSolution(const BQP *bqp);
 
 // High-precision per-thread monotonic clock value expressed in milliseconds
 long long realtime_clock();
