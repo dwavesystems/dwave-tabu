@@ -1,6 +1,6 @@
 import os
 from io import open
-from setuptools import setup, find_packages, Extension
+from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
 class cythonizing_build_ext(build_ext):
@@ -101,6 +101,7 @@ classifiers = [
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
 ]
 
 python_requires = '>=3.5'
@@ -114,13 +115,13 @@ setup(
     long_description=open('README.rst', encoding='utf-8').read(),
     url=package_info['__url__'],
     license=package_info['__license__'],
+    classifiers=classifiers,
+    cmdclass={'build_ext': cythonizing_build_ext},
+    ext_modules=extensions,
     packages=packages,
-    python_requires=python_requires,
     install_requires=install_requires,
     setup_requires=setup_requires,
     extras_require=extras_require,
-    ext_modules=extensions,
-    cmdclass={'build_ext': cythonizing_build_ext},
-    classifiers=classifiers,
     zip_safe=False,
+    python_requires=python_requires,
 )

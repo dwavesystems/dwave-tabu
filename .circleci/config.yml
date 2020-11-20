@@ -179,7 +179,7 @@ jobs:
       PYTHON: 3.5.5
       MACOSX_DEPLOYMENT_TARGET: 10.9
 
-  cpp-tests:
+  test-cpp11:
     docker:
       # just use a python image, all we really want is debian
       - image: circleci/python:3.8-buster
@@ -189,20 +189,10 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: Installing gcc and cmake
+      - run: &run-cpp-template
+          name: run cpp tests
           command: |
-            sudo apt-get update
-            sudo apt-get install -y --force-yes gcc g++ cmake
-
-      - run:
-          name: run c++ tests
-          command: |
-            mkdir -p build
-            cd build
-            cmake .. -DTABU_BUILD_TESTS=ON
-            make
-            ./tests/run_tests
+            make -C testscpp/ --always-make
 
 ##################################################################################################
 # Deploy
@@ -346,7 +336,7 @@ workflows:
       - test-osx-3.7
       - test-osx-3.6
       - test-osx-3.5
-      - cpp-tests
+      - test-cpp11
 
   deploy:
     jobs:
