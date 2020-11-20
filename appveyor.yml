@@ -62,9 +62,6 @@ install:
   - "%PYTHON%\\python.exe -m pip install -r requirements.txt -r tests\\requirements.txt"
   - "%PYTHON%\\python.exe -m pip install wheel twine"
 
-  # Install the build dependencies
-  - "choco.exe install -y --no-progress -r swig --version 3.0.12"
-
 build_script:
   # Build the compiled extension
   - "%PYTHON%\\python.exe setup.py build_ext --inplace"

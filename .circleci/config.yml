@@ -30,11 +30,6 @@ jobs:
             - ./env
           key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "tests/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
 
-      - run:
-          name: install swig
-          command: |
-            sudo apt-get install swig
-
       - run: &install-package-template
           name: install package
           command: |
@@ -136,11 +131,6 @@ jobs:
           key: pyenv-{{ .Environment.CIRCLE_JOB }}-xcode-12.1.0
 
       - run:
-          name: install swig
-          command: |
-            HOMEBREW_NO_AUTO_UPDATE=1 brew install swig
-
-      - run:
           name: create virtualenv
           command: |
             eval "$(pyenv init -)"
@@ -228,18 +218,6 @@ jobs:
       - checkout
 
       - run:
-          name: install swig from source
-          command: |
-            # on manylinux (CentOS 5), latest yum swig does not support Python 3
-            # install it from source
-            export BUILD_PREFIX="${BUILD_PREFIX:-/usr/local}"
-            . .circleci/utils.sh
-            install_swig
-            # make available downstream, check version
-            export PATH="$BUILD_PREFIX/bin:$PATH"
-            swig -version
-
-      - run:
           name: build wheels
           command: |
             for PYBIN in /opt/python/*/bin; do
@@ -296,11 +274,6 @@ jobs:
           name: install pyenv
           command: |
             HOME_NO_AUTO_UPDATE=1 brew install pyenv
-
-      - run:
-          name: install swig
-          command: |
-            HOME_NO_AUTO_UPDATE=1 brew install swig
 
       - restore_cache:
           keys:
