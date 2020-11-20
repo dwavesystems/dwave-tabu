@@ -109,3 +109,19 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
             # ~ 1000 ms (but be gracious on slow CI VMs)
             with self.assertRuntimeWithin(900, 1900):
                 wait([executor.submit(search, timeout=500) for _ in range(4)])
+
+    def test_float(self):
+        n = 20
+        init = [1] * n
+        tenure = len(init) - 1
+        timeout = 20
+
+        bqm = dimod.generators.random.uniform(n, 'BINARY', low=-100, high=100, seed=123)
+        Q, _ = tabu.TabuSampler._bqm_to_tabu_qubo(bqm)
+        search = tabu.TabuSearch(Q, init, tenure, timeout)
+        self.assertAlmostEqual(search.bestEnergy(), -1465.9867898)
+
+        bqm = dimod.generators.random.uniform(n, 'BINARY', low=-1, high=1, seed=123)
+        Q, _ = tabu.TabuSampler._bqm_to_tabu_qubo(bqm)
+        search = tabu.TabuSearch(Q, init, tenure, timeout)
+        self.assertAlmostEqual(search.bestEnergy(), -14.65986790)
