@@ -36,6 +36,7 @@ TabuSearch::TabuSearch(vector<vector<double> > Q, vector<int> initSol, int tenur
     if (tenure < 0 || tenure > (nvars - 1))
         throw Exception("tenure must be in the range [0, num_vars - 1]");
 
+    // Set up bqp
     bqp.evalNum = 0;
     bqp.iterNum = 0;
     bqp.nIterations = 0;
@@ -55,9 +56,11 @@ TabuSearch::TabuSearch(vector<vector<double> > Q, vector<int> initSol, int tenur
     }
     bqp.solution.resize(nvars);
     bqp.solutionQuality = 0;
-    bqpSolver_multiStartTabooSearch(&bqp, timeout, 1000000, tenure, initSol, nullptr);
-}
 
+    // Solve and update bqp
+    BQPSolver solver = BQPSolver(bqp);
+    bqp = solver.multiStartTabuSearch(timeout, 1000000, tenure, initSol, nullptr);
+}
 
 double TabuSearch::bestEnergy()
 {

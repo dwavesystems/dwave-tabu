@@ -59,6 +59,7 @@ double bqpUtil_getChangeInObjective(const BQP *bqp, const vector<int> &oldSoluti
     double change = (changed)? inc : -inc;  
 
     for (int i = bqp->nVars; i--;) {
+        // looking for all the other variables that are already flipped
         if ((oldSolution[i] == 1) && (i != flippedBit)) {
             inc = bqp->Q[flippedBit][i] + bqp->Q[i][flippedBit];
             change += (changed)?  inc : -inc;
