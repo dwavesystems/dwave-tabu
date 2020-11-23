@@ -36,3 +36,53 @@ TEST_CASE("Test bqpUtil_initBQPSolution") {
     REQUIRE(bqp.nIterations == 1);
     REQUIRE(bqp.solutionQuality == 12);
 }
+
+TEST_CASE("Testing bqpUtil_convertBQPToUpperTriangular()") {
+    vector<vector<double> > Q {{2.3, 1.1, -1.5},
+                               {1.1, 2.0, 2.4},
+                               {1.0, 1.4, 2.1}};
+
+    BQP bqp;
+    bqp.Q = Q;
+    bqp.nVars = 3;
+
+    auto orig_Q = bqp.Q;
+
+    bqpUtil_convertBQPToUpperTriangular(&bqp);
+
+    for (int i = 0; i < bqp.nVars; i++) {
+        for (int j = i + 1; j < bqp.nVars; j++) {
+            REQUIRE(bqp.Q[i][j] == orig_Q[i][j] + orig_Q[j][i]);
+            REQUIRE(bqp.Q[j][i] == 0);
+        }
+    }
+}
+
+TEST_CASE("Testing bqpUtil_getObjective() and bqpUtil_getChangeInObjective()") {
+    vector<vector<double>> Q = {{1, -2},
+                                {0, 1}};    // equality problem
+    BQP bqp;
+    bqp.Q = Q;
+    bqp.nVars = 2;
+
+    vector<int> solution = {0, 0};
+    REQUIRE(bqpUtil_getObjective(&bqp, solution) == 0);
+
+    vector<int> new_solution = {0, 1};
+    REQUIRE(bqpUtil_getObjective(&bqp, new_solution) == 1);
+
+    REQUIRE(bqpUtil_getChangeInObjective(&bqp, solution, 1) == 1);
+    REQUIRE(bqpUtil_getChangeInObjective(&bqp, new_solution, 1) == -1);
+}
+
+TEST_CASE("Testing bqpUtil_getMaxBQPCoeff()") {
+    vector<vector<double> > Q {{2, 1, -1},
+                               {3, -2, 1},
+                               {-1, 1, 2}};
+
+    BQP bqp;
+    bqp.Q = Q;
+    bqp.nVars = 3;
+
+    REQUIRE(bqpUtil_getMaxBQPCoeff(&bqp) == 3);  
+}
