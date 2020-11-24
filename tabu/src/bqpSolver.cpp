@@ -34,8 +34,7 @@ BQP BQPSolver::multiStartTabuSearch(long long timeLimitInMilliSecs,
     int Z1Coeff = (bqp.nVars <= 500)? 10000 : 25000;
     int Z2Coeff = (bqp.nVars <= 500)? 2500 : 10000;
 
-    bqpUtil_convertBQPToUpperTriangular(&bqp);
-    bqpUtil_initBQPSolution(&bqp, initSolution);
+    bqp.initialize(initSolution);
 
     simpleTabuSearch(bqp.solution, bqp.solutionQuality, tabuTenure, Z1Coeff, timeLimitInMilliSecs, callback);
 
@@ -65,7 +64,7 @@ BQP BQPSolver::multiStartTabuSearch(long long timeLimitInMilliSecs,
                 bqp.solution[I[i]] = 1 - bqp.solution[I[i]];  // flipping variable
             }
         }
-        bqp.solutionQuality = bqpUtil_getObjective(&bqp, bqp.solution);
+        bqp.solutionQuality = bqp.getObjective(bqp.solution);
 
         // Run taboo search and update solution again
         simpleTabuSearch(bqp.solution, bqp.solutionQuality, tabuTenure, Z2Coeff, timeLimitInMilliSecs - (realtime_clock() - startTime), callback);
@@ -114,7 +113,7 @@ double BQPSolver::simpleTabuSearch(const vector<int> &starting,
         taboo[i] = 0;
         solution[i] = starting[i];
         bqp.solution[i] = starting[i];
-        changeInObjective[i] = bqpUtil_getChangeInObjective(&bqp, starting, i);
+        changeInObjective[i] = bqp.getChangeInObjective(starting, i);
     }
 
     double prevCost = bqp.solutionQuality;

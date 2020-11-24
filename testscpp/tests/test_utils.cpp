@@ -20,69 +20,50 @@
 
 using std::vector;
 
-TEST_CASE("Test bqpUtil_initBQPSolution") {
+TEST_CASE("Test BQP::initialize()") {
     vector<vector<double> > Q {{2,1,1},
                                {1,2,1},
                                {1,1,2}};
 
-    BQP bqp;
-    bqp.Q = Q;
-    bqp.nVars = 3;
+    BQP bqp = BQP(Q);
 
     vector<int> solution = {1, 1, 1};
-    bqpUtil_initBQPSolution(&bqp, solution);
-    
-    REQUIRE(bqp.solution == solution);
-    REQUIRE(bqp.nIterations == 1);
-    REQUIRE(bqp.solutionQuality == 12);
-}
+    bqp.initialize(solution);
 
-TEST_CASE("Testing bqpUtil_convertBQPToUpperTriangular()") {
-    vector<vector<double> > Q {{2.3, 1.1, -1.5},
-                               {1.1, 2.0, 2.4},
-                               {1.0, 1.4, 2.1}};
-
-    BQP bqp;
-    bqp.Q = Q;
-    bqp.nVars = 3;
-
-    auto orig_Q = bqp.Q;
-
-    bqpUtil_convertBQPToUpperTriangular(&bqp);
-
+    // Check that Q matrix was converted to upper triangular
     for (int i = 0; i < bqp.nVars; i++) {
         for (int j = i + 1; j < bqp.nVars; j++) {
-            REQUIRE(bqp.Q[i][j] == orig_Q[i][j] + orig_Q[j][i]);
+            REQUIRE(bqp.Q[i][j] == Q[i][j] + Q[j][i]);
             REQUIRE(bqp.Q[j][i] == 0);
         }
     }
+    
+    // Check that solution was set
+    REQUIRE(bqp.solution == solution);
+    REQUIRE(bqp.solutionQuality == 12);
+    REQUIRE(bqp.nIterations == 1);
 }
 
-TEST_CASE("Testing bqpUtil_getObjective() and bqpUtil_getChangeInObjective()") {
-    vector<vector<double>> Q = {{1, -2},
-                                {0, 1}};    // equality problem
-    BQP bqp;
-    bqp.Q = Q;
-    bqp.nVars = 2;
+TEST_CASE("Testing BQP::getObjective() and BQP::getChangeInObjective()") {
+    vector<vector<double>> Q = {{1, -1},
+                                {-1, 1}};    // equality problem
+    BQP bqp = BQP(Q);
 
     vector<int> solution = {0, 0};
-    REQUIRE(bqpUtil_getObjective(&bqp, solution) == 0);
+    REQUIRE(bqp.getObjective(solution) == 0);
 
     vector<int> new_solution = {0, 1};
-    REQUIRE(bqpUtil_getObjective(&bqp, new_solution) == 1);
+    REQUIRE(bqp.getObjective(new_solution) == 1);
 
-    REQUIRE(bqpUtil_getChangeInObjective(&bqp, solution, 1) == 1);
-    REQUIRE(bqpUtil_getChangeInObjective(&bqp, new_solution, 1) == -1);
+    REQUIRE(bqp.getChangeInObjective(solution, 1) == 1);
+    REQUIRE(bqp.getChangeInObjective(new_solution, 1) == -1);
 }
 
-TEST_CASE("Testing bqpUtil_getMaxBQPCoeff()") {
-    vector<vector<double> > Q {{2, 1, -1},
+TEST_CASE("Testing BQP::getMaxBQPCoeff()") {
+    vector<vector<double> > Q {{2, 3, -1},
                                {3, -2, 1},
                                {-1, 1, 2}};
 
-    BQP bqp;
-    bqp.Q = Q;
-    bqp.nVars = 3;
-
-    REQUIRE(bqpUtil_getMaxBQPCoeff(&bqp) == 3);  
+    BQP bqp = BQP(Q);
+    REQUIRE(bqp.getMaxBQPCoeff() == 3);  
 }

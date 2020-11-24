@@ -22,40 +22,14 @@
 using std::vector;
 using std::size_t;
 
-TabuSearch::TabuSearch(vector<vector<double> > Q, vector<int> initSol, int tenure, long int timeout)
+TabuSearch::TabuSearch(vector<vector<double>> Q, vector<int> initSol, int tenure, long int timeout) : bqp(Q)
 {
     size_t nvars = Q.size();
-    for (int i = 0; i < nvars; i++){
-        if (Q[i].size() != nvars)
-            throw Exception("Q must be a symmetric square matrix");
-    }
-
     if (initSol.size() != nvars)
         throw Exception("length of init_solution doesn't match the size of Q");
 
     if (tenure < 0 || tenure > (nvars - 1))
         throw Exception("tenure must be in the range [0, num_vars - 1]");
-
-    // Set up bqp
-    bqp.evalNum = 0;
-    bqp.iterNum = 0;
-    bqp.nIterations = 0;
-    bqp.nVars = nvars;
-    bqp.restartNum = 0;
-    bqp.Q.resize(nvars);
-    bqp.upperBound = -std::numeric_limits<double>::max();
-    for (int i = 0; i < nvars; i++)
-        bqp.Q[i].resize(nvars);
-
-    for (int i = 0; i < nvars; i++){
-        for (int j = i; j < nvars; j++){
-            if (Q[i][j] != Q[j][i])
-                throw Exception("Q must be symmetric");
-            bqp.Q[i][j] = bqp.Q[j][i] = Q[i][j];
-        }
-    }
-    bqp.solution.resize(nvars);
-    bqp.solutionQuality = 0;
 
     // Solve and update bqp
     BQPSolver solver = BQPSolver(bqp);
@@ -64,7 +38,7 @@ TabuSearch::TabuSearch(vector<vector<double> > Q, vector<int> initSol, int tenur
 
 double TabuSearch::bestEnergy()
 {
-    return bqpUtil_getObjective(&bqp, bqp.solution);
+    return bqp.getObjective(bqp.solution);
 }
 
 vector<int> TabuSearch::bestSolution()

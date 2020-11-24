@@ -23,102 +23,70 @@
 #include <math.h>
 #include <vector>
 
-/**
- * Structure to represent a BQP
- * Q: the Q matrix
- * nVars: number of variables
- * solution: array of size nVars where every entry is 0 or 1. current solution.
- * solutionQuality: objective function value at solution
- * nIterations: number of iterations required to arrive at this solution
- */
-typedef struct {
-	std::vector<std::vector<double> > Q;
-	int nVars;
-	std::vector<int> solution;
-	double solutionQuality;
-	unsigned long long nIterations;
-	/*added to record more statistics.*/
-	unsigned long long restartNum;
-	unsigned long long iterNum;
-	unsigned long long evalNum;
-	double upperBound;
-} BQP;
+class BQP 
+{
+	public:
+		BQP(std::vector<std::vector<double>> Q);
 
+		/**
+		 * Calls toUpperTriangular() and sets the solution
+		 * @return void
+		 */
+		void initialize(const std::vector<int> &initSolution);
 
-/**
- * Gets the maximum abs(Q[i][j]) in a bqp
- * @param bqp
- * @return maximum Q[i][j]
- */
-double bqpUtil_getMaxBQPCoeff(const BQP *bqp);
+		/**
+		 * Converts a generic bqp Q matrix into upper triangular using:
+		 * Q[i][j] = Q[i][j] + Q[j][i] for all i < j
+		 * @return void
+		 */
+		void toUpperTriangular();
 
-/**
- * Converts a generic bqp Q matrix into upper triangular using:
- * Q[i][j] = Q[i][j] + Q[j][i] for all i < j
- * @param bqp
- * @return void
- */
-void bqpUtil_convertBQPToUpperTriangular(BQP *bqp);
+		/**
+		 * Computes the value by which the objective function is changed if
+		 * exactly one bit in the solution is flipped
+		 * @param oldSolution: Current solution
+		 * @param flippedBit: The bit that is flipped
+		 * @return Change in objective
+		 */
+		double getChangeInObjective(const std::vector<int> &oldSolution, int flippedBit);
 
-/**
- * Print a BQP
- * @param bqp: BQP to be printed
- * @return void
- */
-void bqpUtil_print(const BQP *bqp);
+		/**
+		 * Computes the value of objective function for a given solution
+		 * @param solution: Given solution
+		 * @return Value of objective function
+		 */
+		double getObjective(const std::vector<int> &solution);
+		
+		/**
+		 * Gets the maximum abs(Q[i][j])
+		 * @return Maximum Q[i][j]
+		 */
+		double getMaxBQPCoeff();
 
-/**
- * Compute the value by which the objective function is changed if
- * exactly one bit in the solution is flipped
- * @param bqp: the BQP
- * @param oldSolution: current solution
- * @param flippedBit: the bit that is flipped
- * @return change in objective
- */
-double bqpUtil_getChangeInObjective(const BQP *bqp, const std::vector<int> &oldSolution, int flippedBit);
+		/**
+		 * Prints Q matrix
+		 * @return void
+		 */
+		void printQ();
 
-/**
- * Computes the value of objective function of a BQP for a given solution
- * @param bqp: the BQP
- * @param solution: given solution
- * @return value of objective function
- */
-double bqpUtil_getObjective(const BQP *bqp, const std::vector<int> &solution);
+		/**
+		 * Prints the current solution
+		 * @return void
+		 */
+		void printSolution();
 
-/**
- * Computes the value of objective function of a BQP for a given solution,
- * given some old solution.
- * If an old solution and the objective function value for that old solution
- * is known, then we can calculate the objective for the new solution quicker
- * by building up on the old solution.
- * @param bqp: the BQP
- * @param solution: new solution
- * @param oldSolution: old solution
- * @param oldCost: value of objective function at old solution
- * @return value ot objective function at new solution
- */
-double bqpUtil_getObjectiveIncremental(const BQP *bqp, const std::vector<int> &solution, const std::vector<int> &oldSolution, double oldCost);
+		std::vector<std::vector<double> > Q;	// Q matrix
+		int nVars;								// Number of problem variables
+		std::vector<int> solution;				// Current solution, vector of size nVars where every entry is 0 or 1
+		double solutionQuality;					// Objective function value at solution
+		unsigned long long nIterations;			// Number of iterations required to arrive at solution
 
-/**
- * Initialize the current solution in a BQP to all zeros
- * @param bqp: the BQP
- * @return void
- */
-void bqpUtil_initBQPSolution(BQP *bqp, const std::vector<int> &initSolution);
-
-/**
- * Initialize the current solution in a BQP randomly
- * @param bqp: the BQP
- * @return void
- */
-void bqpUtil_randomizeBQPSolution(BQP *bqp);
-
-/**
- * Print the current solution of BQP
- * @param bqp: the BQP
- * @return void
- */
-void bqpUtil_printSolution(const BQP *bqp);
+		/*added to record more statistics.*/
+		unsigned long long restartNum;
+		unsigned long long iterNum;
+		unsigned long long evalNum;
+		double upperBound;	
+};
 
 // High-precision per-thread monotonic clock value expressed in milliseconds
 long long realtime_clock();
