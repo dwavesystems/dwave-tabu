@@ -88,7 +88,7 @@ if USE_CYTHON:
 extensions = [
     Extension(
         name='tabu.tabu_search',
-        sources=['./tabu/tabu_search.pyx', './tabu/src/bqpUtil.cpp', './tabu/src/bqpSolver.cpp'],
+        sources=['./tabu/tabu_search.pyx', './tabu/src/bqpUtil.cpp', './tabu/src/bqpSolver.cpp', './tabu/src/bqp.cpp'],
         include_dirs=['./tabu/src/']), 
 ]
 

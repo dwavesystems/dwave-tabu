@@ -22,6 +22,7 @@
 #include <time.h>
 #include <math.h>
 #include <vector>
+#include "bqp.h"
 #include "bqpUtil.h"
 
 #define LAMBDA 5000

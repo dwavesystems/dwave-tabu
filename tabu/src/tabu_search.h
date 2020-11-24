@@ -16,7 +16,7 @@
 #define __TABU_SEARCH_H__
 
 #include <vector>
-#include "bqpUtil.h"
+#include "bqp.h"
 
 class TabuSearch
 {

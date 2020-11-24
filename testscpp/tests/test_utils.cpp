@@ -16,7 +16,7 @@
 
 #include <vector>
 
-#include "bqpUtil.cpp"
+#include "bqp.cpp"
 
 using std::vector;
 
