@@ -19,6 +19,23 @@
 #include "bqp.cpp"
 
 using std::vector;
+using Catch::Matchers::Contains;
+
+TEST_CASE("Test constructor") {
+    vector<vector<double> > bad_Q {{1,-2},
+                                   {0, 1}};
+
+    REQUIRE_THROWS_WITH([&]() {
+        BQP bqp = BQP(bad_Q);
+    }(), Contains("Q must be symmetric"));
+
+    bad_Q = {{1,-2},
+             {-2, 1, 0}};
+
+    REQUIRE_THROWS_WITH([&]() {
+        BQP bqp = BQP(bad_Q);
+    }(), Contains("Q must be a symmetric square matrix"));   
+}
 
 TEST_CASE("Test BQP::initialize()") {
     vector<vector<double> > Q {{2,1,1},

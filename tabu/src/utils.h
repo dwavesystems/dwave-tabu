@@ -12,9 +12,9 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#ifndef _BQPUTIL_H_
+#ifndef _UTILS_H_
 
-#define _BQPUTIL_H_
+#define _UTILS_H_
 
 // High-precision per-thread monotonic clock value expressed in milliseconds
 long long realtime_clock();
