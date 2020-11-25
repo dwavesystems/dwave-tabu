@@ -30,9 +30,15 @@ TabuSearch::TabuSearch(vector<vector<double>> Q, vector<int> initSol, int tenure
 
     if (tenure < 0 || tenure > (nvars - 1))
         throw Exception("tenure must be in the range [0, num_vars - 1]");
+    else if (tenure > 0) {
+        tabooTenure = tenure;
+    }
+    else {
+        tabooTenure = (20 < (int)(bqp.nVars / 4.0))? 20 : (int)(bqp.nVars / 4.0);
+    }
 
     // Solve and update bqp
-    multiStartTabuSearch(timeout, 1000000, tenure, initSol, nullptr);
+    multiStartTabuSearch(timeout, 1000000, initSol, nullptr);
 }
 
 double TabuSearch::bestEnergy()
@@ -47,7 +53,6 @@ vector<int> TabuSearch::bestSolution()
 
 void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs, 
                                       int numStarts, 
-                                      int tabuTenure, 
                                       const vector<int> &initSolution, 
                                       const bqpSolver_Callback *callback) {
 
@@ -61,7 +66,7 @@ void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs,
 
     bqp.initialize(initSolution);
 
-    simpleTabuSearch(bqp.solution, bqp.solutionQuality, tabuTenure, Z1Coeff, timeLimitInMilliSecs, callback);
+    simpleTabuSearch(bqp.solution, bqp.solutionQuality, Z1Coeff, timeLimitInMilliSecs, callback);
 
     double bestSolutionQuality = bqp.solutionQuality;
     vector<int> bestSolution(bqp.solution.begin(), bqp.solution.end());
@@ -92,7 +97,7 @@ void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs,
         bqp.solutionQuality = bqp.getObjective(bqp.solution);
 
         // Run taboo search and update solution again
-        simpleTabuSearch(bqp.solution, bqp.solutionQuality, tabuTenure, Z2Coeff, timeLimitInMilliSecs - (realtime_clock() - startTime), callback);
+        simpleTabuSearch(bqp.solution, bqp.solutionQuality, Z2Coeff, timeLimitInMilliSecs - (realtime_clock() - startTime), callback);
     
         if (bestSolutionQuality > bqp.solutionQuality) {
             bestSolutionQuality = bqp.solutionQuality;
@@ -109,24 +114,15 @@ void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs,
 }
 
 double TabuSearch::simpleTabuSearch(const vector<int> &starting,
-                                   double startingObjective,
-                                   int tt,
-                                   long long ZCoeff,
-                                   long long timeLimitInMilliSecs,
-                                   const bqpSolver_Callback *callback) {
+                                    double startingObjective,
+                                    long long ZCoeff,
+                                    long long timeLimitInMilliSecs,
+                                    const bqpSolver_Callback *callback) {
 
     long long startTime = realtime_clock();
     
     bqp.restartNum++;  // added to record more statistics
     bqp.solutionQuality = startingObjective;
-
-    int tabooTenure;    // num of previous solutions we keep track of
-    if (tt > 0) { 
-        tabooTenure = tt;
-    }
-    else {
-        tabooTenure = (20 < (int)(bqp.nVars / 4.0))? 20 : (int)(bqp.nVars / 4.0);
-    }
 
     vector<int> taboo(bqp.nVars);  // used to keep track of history of flipped bits
     vector<int> solution(bqp.nVars);

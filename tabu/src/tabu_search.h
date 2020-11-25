@@ -39,12 +39,11 @@ class TabuSearch
          * Simple tabu search solver with multi starts. Updates bqp with best solution found.
          * \param timLimitInMilliSecs: Time limit in milli seconds
          * \param numStarts: Number of re starts
-         * \param tabuTenure: Number of previous solutions to keep track of
          * \param initSolution: Starting solution to start search from
          * \param callback: Optional callback function
          * \return
          */
-        void multiStartTabuSearch(long long timeLimitInMilliSecs, int numStarts, int tabuTenure, const std::vector<int> &initSolution, const bqpSolver_Callback *callback);
+        void multiStartTabuSearch(long long timeLimitInMilliSecs, int numStarts, const std::vector<int> &initSolution, const bqpSolver_Callback *callback);
 
         /**
          * Solves the BQP using simple tabu search heuristic
@@ -55,7 +54,7 @@ class TabuSearch
          * \param callback: Optional callback function
          * \return Best solution found
          */
-        double simpleTabuSearch(const std::vector<int> &starting, double startingObjective, int tt, long long ZCoeff, long long timeLimitInMilliSecs, const bqpSolver_Callback *callback);
+        double simpleTabuSearch(const std::vector<int> &starting, double startingObjective, long long ZCoeff, long long timeLimitInMilliSecs, const bqpSolver_Callback *callback);
 
         /**
          * Solves the BQP using basic local searching
@@ -99,6 +98,11 @@ class TabuSearch
          * Stores the problem, the solution, and some statistics
          */
         BQP bqp;
+
+        /**
+         * Number of previous solutions to keep track of
+         */
+        int tabooTenure;
 };
 
 #endif
