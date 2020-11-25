@@ -82,8 +82,8 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         self.assertEqual(energy, 0.0)
 
     def test_correctness(self):
-        qubo = [[2, 1, 1], [1, 2, 1], [1, 1, 2]]
-        init = [1, 1, 1]
+        qubo = [[-1.2, 1.1], [1.1, -1.2]]
+        init = [1, 1]
         tenure = len(init) - 1
         timeout = 20
 
@@ -92,8 +92,8 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         solution = list(search.bestSolution())
         energy = search.bestEnergy()
 
-        self.assertEqual(solution, [0, 0, 0])
-        self.assertEqual(energy, 0.0)
+        self.assertEqual(solution, [0, 1])
+        self.assertEqual(energy, -1.2)
 
     def test_concurrency(self):
 
