@@ -74,19 +74,16 @@ double BQP::getObjective(const vector<int> &solution) {
 }
 
 double BQP::getChangeInObjective(const vector<int> &oldSolution, int flippedBit) {
-    bool changed = oldSolution[flippedBit] != 1;
-
-    double inc = Q[flippedBit][flippedBit];
-    double change = (changed)? inc : -inc;  
-
-    for (int i = nVars; i--;) {
-        // looking for all the other variables that are already flipped
+    // Add up all biases associated with the variable at flippedBit
+    double change = Q[flippedBit][flippedBit];
+    for (int i = 0; i < nVars; i++) {
         if ((oldSolution[i] == 1) && (i != flippedBit)) {
-            inc = Q[flippedBit][i] + Q[i][flippedBit];
-            change += (changed)?  inc : -inc;
+            change += Q[flippedBit][i] + Q[i][flippedBit];
         }
     }
-    return change;
+
+    // Flipping to 0 = negative change, flipping to 1 = positive change
+    return oldSolution[flippedBit] ? -change : change;
 }
 
 double BQP::getMaxBQPCoeff() {
