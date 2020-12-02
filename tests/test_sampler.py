@@ -176,7 +176,7 @@ class TestTabuSampler(unittest.TestCase):
             tabu.TabuSampler().sample(bqm, num_reads=0)
 
         # invalid initial_states type
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             tabu.TabuSampler().sample(bqm, initial_states=[])
 
         with self.assertRaises(ValueError):

@@ -25,21 +25,19 @@ cdef class TabuSearch:
     """Wraps the class `TabuSearch` from `tabu_search.cc`."""
     cdef tabu.TabuSearch *c_tabu
 
-    def __cinit__(self, double[:,:] Q, initSol, int tenure, long int timeout, varorder=None) :
+    def __cinit__(self, object Q, object initSol, int tenure, long int timeout) :
+        cdef double[:,:] qubo = np.asarray(Q, dtype=np.double)
         cdef vector[vector[double]] Qvec
-        Qvec.resize(Q.shape[0])
+        Qvec.resize(qubo.shape[0])
         cdef Py_ssize_t i, j
-        for i in range(Q.shape[0]):
-            for j in range(Q.shape[1]):
-                Qvec[i].push_back(Q[i, j])
+        for i in range(qubo.shape[0]):
+            for j in range(qubo.shape[1]):
+                Qvec[i].push_back(qubo[i, j])
 
+        cdef int[:] initial = np.asarray(initSol, dtype=np.intc)  
         cdef vector[int] initVec
-        if isinstance(initSol, dict) and varorder is not None:
-            for v in varorder:
-                initVec.push_back(initSol[v])
-        elif isinstance(initSol, (list, np.ndarray)):
-            for i in range(len(initSol)):
-                initVec.push_back(initSol[i])
+        for i in range(len(initial)):
+            initVec.push_back(initial[i])
 
         with nogil:
             self.c_tabu = new tabu.TabuSearch(Qvec, initVec, tenure, timeout)

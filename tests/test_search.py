@@ -69,7 +69,7 @@ class RunTimeAssertionMixin(object):
 class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
 
     def test_trivial(self):
-        qubo = np.array([[1.0]])
+        qubo = [[1.0]]
         init = [1]
         tenure = len(init) - 1
         timeout = 1
@@ -83,7 +83,7 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         self.assertEqual(energy, 0.0)
 
     def test_correctness(self):
-        qubo = np.array([[-1.2, 1.1], [1.1, -1.2]])
+        qubo = [[-1.2, 1.1], [1.1, -1.2]]
         init = [1, 1]
         tenure = len(init) - 1
         timeout = 20
@@ -99,7 +99,7 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
     def test_concurrency(self):
 
         def search(timeout):
-            return tabu.TabuSearch(np.array([[1.0]]), [1], 0, timeout).bestEnergy()
+            return tabu.TabuSearch([[1.0]], [1], 0, timeout).bestEnergy()
 
         with ThreadPoolExecutor(max_workers=3) as executor:
 
@@ -128,7 +128,7 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         self.assertAlmostEqual(search.bestEnergy(), -14.65986790)
 
     def test_exceptions(self):
-        qubo = np.array([[-1.2, 1.1], [1.1, -1.2]])
+        qubo = [[-1.2, 1.1], [1.1, -1.2]]
 
         # Wrong length for init_solution
         with self.assertRaises(RuntimeError):
