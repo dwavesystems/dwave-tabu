@@ -30,7 +30,7 @@ typedef struct bqpSolver_Callback {
 class TabuSearch
 {
     public:
-        TabuSearch(std::vector<std::vector<double>> Q, std::vector<int> initSol, int tenure, long int timeout);
+        TabuSearch(std::vector<std::vector<double>> Q, const std::vector<int> initSol, int tenure, long int timeout);
         double bestEnergy();
         std::vector<int> bestSolution();
 

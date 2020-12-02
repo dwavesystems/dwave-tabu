@@ -172,8 +172,12 @@ class TabuSampler(dimod.Sampler):
         # run Tabu search
         samples = numpy.empty((num_reads, len(bqm)), dtype=numpy.int8)
         for ni in range(num_reads):
-            init_solution = self._bqm_sample_to_tabu_solution(next(init_sample_generator), varorder)
-            r = TabuSearch(qubo, init_solution, tenure, timeout)
+            init_solution = next(init_sample_generator)
+
+            if isinstance(init_solution, dimod.views.samples.SampleView):
+                init_solution = dict(init_solution)
+
+            r = TabuSearch(qubo, init_solution, tenure, timeout, varorder=varorder)
             samples[ni, :] = r.bestSolution()
 
         if bqm.vartype is dimod.SPIN:
@@ -221,37 +225,4 @@ class TabuSampler(dimod.Sampler):
         # but the Tabu solver we're using requires slightly different qubo matrix.
         ud *= .5
         symm = ud + ud.T
-        qubo = symm.tolist()
-        return qubo, varorder
-
-    @staticmethod
-    def _bqm_sample_to_tabu_solution(sample, varorder):
-        sample = TabuSampler._sample_as_dict(sample)
-        return [int(sample[v]) for v in varorder]
-
-    @staticmethod
-    def _sample_as_dict(sample):
-        """Convert list-like ``sample`` (list/dict/dimod.SampleView),
-        ``list: var``, to ``map: idx -> var``.
-        """
-        if isinstance(sample, dict):
-            return sample
-        if isinstance(sample, (list, numpy.ndarray)):
-            sample = enumerate(sample)
-        return dict(sample)
-
-
-if __name__ == "__main__":
-    from pprint import pprint
-
-    print("TabuSampler:")
-    bqm = dimod.BinaryQuadraticModel(
-        {'a': 0.0, 'b': -1.0, 'c': 0.5},
-        {('a', 'b'): -1.0, ('b', 'c'): 1.5},
-        offset=0.0, vartype=dimod.BINARY)
-    response = TabuSampler().sample(bqm, num_reads=10)
-    pprint(list(response.data()))
-
-    print("ExactSolver:")
-    response = dimod.ExactSolver().sample(bqm)
-    pprint(list(response.data(sorted_by='energy')))
+        return symm, varorder

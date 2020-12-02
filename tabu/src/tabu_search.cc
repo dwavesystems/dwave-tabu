@@ -22,7 +22,7 @@
 using std::vector;
 using std::size_t;
 
-TabuSearch::TabuSearch(vector<vector<double>> Q, vector<int> initSol, int tenure, long int timeout) : bqp(Q)
+TabuSearch::TabuSearch(vector<vector<double>> Q, const vector<int> initSol, int tenure, long int timeout) : bqp(Q)
 {
     size_t nvars = Q.size();
     if (initSol.size() != nvars)

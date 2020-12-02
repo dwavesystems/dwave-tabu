@@ -14,7 +14,7 @@
 
 from libcpp.vector cimport vector
 
-cdef extern from "tabu_search.h":
+cdef extern from "tabu_search.h" nogil:
     cdef cppclass TabuSearch:
         TabuSearch(vector[vector[double]] Q, const vector[int] initSol, int tenure, long int timeout) except +
         double bestEnergy()
