@@ -1,0 +1,4 @@
+[submodule "testscpp/Catch2"]
+	path = testscpp/Catch2
+	url = https://github.com/catchorg/Catch2.git
+	branch = v2.x

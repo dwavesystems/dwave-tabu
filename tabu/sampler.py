@@ -14,20 +14,20 @@
 
 """A dimod :term:`sampler` that uses the MST2 multistart tabu search algorithm."""
 
-from __future__ import division
 
 import random
 import warnings
 import itertools
 from functools import partial
 
-import numpy
+import numpy as np
 import dimod
 
 from tabu import TabuSearch
 
+__all__ = ["TabuSampler"]
 
-class TabuSampler(dimod.Sampler):
+class TabuSampler(dimod.Sampler, dimod.Initialized):
     """A tabu-search sampler.
 
     Examples:
@@ -53,7 +53,7 @@ class TabuSampler(dimod.Sampler):
         self.properties = {}
 
     def sample(self, bqm, initial_states=None, initial_states_generator='random',
-               num_reads=None, tenure=None, timeout=20, **kwargs):
+               num_reads=None, seed=None, tenure=None, timeout=20, **kwargs):
         """Run Tabu search on a given binary quadratic model.
 
         Args:
@@ -88,6 +88,11 @@ class TabuSampler(dimod.Sampler):
                 to match the number of initial states given. If initial states
                 are not provided, only one read is performed.
 
+            seed (int (32-bit unsigned integer), optional):
+                Seed to use for the PRNG. Specifying a particular seed with a
+                constant set of parameters produces identical results. If not
+                provided, a random seed is chosen.
+            
             tenure (int, optional):
                 Tabu tenure, which is the length of the tabu list, or number of recently
                 explored solutions kept in memory.
@@ -133,49 +138,24 @@ class TabuSampler(dimod.Sampler):
                 DeprecationWarning)
             initial_states = kwargs.pop('init_solution')
 
-        if initial_states is None:
-            initial_states = dimod.SampleSet.from_samples([], vartype=bqm.vartype, energy=0)
+        # Get initial_states in binary form
+        parsed = self.parse_initial_states(bqm.binary, 
+                                           initial_states=initial_states, 
+                                           initial_states_generator=initial_states_generator, 
+                                           num_reads=num_reads, 
+                                           seed=seed)
 
-        if not isinstance(initial_states, dimod.SampleSet):
-            raise TypeError("'initial_states' is not 'dimod.SampleSet' instance")
-
-        if num_reads is None:
-            num_reads = len(initial_states) or 1
-        if not isinstance(num_reads, int):
-            raise TypeError("'num_reads' should be a positive integer")
-        if num_reads < 1:
-            raise ValueError("'num_reads' should be a positive integer")
-
-        _generators = {
-            'none': self._none_generator,
-            'tile': self._tile_generator,
-            'random': partial(self._random_generator, bqm=bqm.binary)
-        }
-
-        if len(initial_states) < num_reads and initial_states_generator == 'none':
-            raise ValueError("insufficient 'initial_states' given")
-
-        if len(initial_states) < 1 and initial_states_generator == 'tile':
-            raise ValueError("cannot tile an empty sample set")
-
-        if initial_states and initial_states.variables ^ bqm.variables:
-            raise ValueError("mismatch between variables in 'initial_states' and 'bqm'")
-
-        if initial_states_generator not in _generators:
-            raise ValueError("unknown value for 'initial_states_generator'")
-
-        binary_initial_states = initial_states.change_vartype(dimod.BINARY, inplace=False)
-        init_sample_generator = _generators[initial_states_generator](binary_initial_states)
+        parsed_initial_states = np.ascontiguousarray(parsed.initial_states.record.sample)
 
         qubo, varorder = self._bqm_to_tabu_qubo(bqm.binary)
 
         # run Tabu search
-        samples = numpy.empty((num_reads, len(bqm)), dtype=numpy.int8)
-        for ni in range(num_reads):
-            init_solution = self._bqm_sample_to_tabu_solution(next(init_sample_generator), varorder)
-            r = TabuSearch(qubo, init_solution, tenure, timeout)
+        samples = np.empty((parsed.num_reads, len(bqm)), dtype=np.int8)
+        for ni, initial_state in enumerate(parsed_initial_states):
+            r = TabuSearch(qubo, initial_state, tenure, timeout)
             samples[ni, :] = r.bestSolution()
 
+        # we received samples in binary form, so convert if needed
         if bqm.vartype is dimod.SPIN:
             samples *= 2
             samples -= 1
@@ -186,72 +166,15 @@ class TabuSampler(dimod.Sampler):
         return dimod.SampleSet.from_samples_bqm((samples, varorder), bqm=bqm)
 
     @staticmethod
-    def _none_generator(sampleset):
-        for sample in sampleset:
-            yield sample
-        raise ValueError("sample set of initial states depleted")
-
-    @staticmethod
-    def _tile_generator(sampleset):
-        for sample in itertools.cycle(sampleset):
-            yield sample
-
-    @staticmethod
-    def _random_generator(sampleset, bqm):
-        # yield from requires py3
-        for sample in sampleset:
-            yield sample
-        while True:
-            yield TabuSampler._random_sample(bqm)
-
-    @staticmethod
-    def _random_sample(bqm):
-        values = list(bqm.vartype.value)
-        return {i: random.choice(values) for i in bqm.variables}
-
-    @staticmethod
     def _bqm_to_tabu_qubo(bqm):
         # construct dense matrix representation
         ldata, (irow, icol, qdata), offset, varorder = bqm.binary.to_numpy_vectors(return_labels=True)
-        ud = numpy.zeros((len(bqm), len(bqm)), dtype=numpy.double)
-        ud[numpy.diag_indices(len(bqm), 2)] = ldata
+        ud = np.zeros((len(bqm), len(bqm)), dtype=np.double)
+        ud[np.diag_indices(len(bqm), 2)] = ldata
         ud[irow, icol] = qdata
 
-        # Note: normally, conversion would be: `ud + ud.T - numpy.diag(numpy.diag(ud))`,
+        # Note: normally, conversion would be: `ud + ud.T - np.diag(np.diag(ud))`,
         # but the Tabu solver we're using requires slightly different qubo matrix.
         ud *= .5
         symm = ud + ud.T
-        qubo = symm.tolist()
-        return qubo, varorder
-
-    @staticmethod
-    def _bqm_sample_to_tabu_solution(sample, varorder):
-        sample = TabuSampler._sample_as_dict(sample)
-        return [int(sample[v]) for v in varorder]
-
-    @staticmethod
-    def _sample_as_dict(sample):
-        """Convert list-like ``sample`` (list/dict/dimod.SampleView),
-        ``list: var``, to ``map: idx -> var``.
-        """
-        if isinstance(sample, dict):
-            return sample
-        if isinstance(sample, (list, numpy.ndarray)):
-            sample = enumerate(sample)
-        return dict(sample)
-
-
-if __name__ == "__main__":
-    from pprint import pprint
-
-    print("TabuSampler:")
-    bqm = dimod.BinaryQuadraticModel(
-        {'a': 0.0, 'b': -1.0, 'c': 0.5},
-        {('a', 'b'): -1.0, ('b', 'c'): 1.5},
-        offset=0.0, vartype=dimod.BINARY)
-    response = TabuSampler().sample(bqm, num_reads=10)
-    pprint(list(response.data()))
-
-    print("ExactSolver:")
-    response = dimod.ExactSolver().sample(bqm)
-    pprint(list(response.data(sorted_by='energy')))
+        return symm, varorder

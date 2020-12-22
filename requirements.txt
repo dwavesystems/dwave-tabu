@@ -1,3 +1,4 @@
 numpy==1.19.4; python_version >= '3.6'
 numpy==1.18.5; python_version == '3.5'
 dimod==0.9.11
+cython==0.29.21

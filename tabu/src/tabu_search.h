@@ -15,19 +15,94 @@
 #ifndef __TABU_SEARCH_H__
 #define __TABU_SEARCH_H__
 
+#define LAMBDA 5000
+#define ALPHA 0.4
+
 #include <vector>
-#include <map>
-#include "bqpUtil.h"
+
+#include "bqp.h"
+
+typedef struct bqpSolver_Callback {
+  void (*func)(const struct bqpSolver_Callback *callback, BQP *bqp);
+  void *context;
+} bqpSolver_Callback;
 
 class TabuSearch
 {
     public:
-        TabuSearch(std::vector<std::vector<double> > Q, std::vector<int> initSol, int tenure, long int timeout);
+        TabuSearch(std::vector<std::vector<double>> Q, const std::vector<int> initSol, int tenure, long int timeout);
         double bestEnergy();
         std::vector<int> bestSolution();
 
     private:
+        /**
+         * Simple tabu search solver with multi starts. Updates bqp with best solution found.
+         * \param timLimitInMilliSecs: Time limit in milli seconds
+         * \param numStarts: Number of re starts
+         * \param initSolution: Starting solution to start search from
+         * \param callback: Optional callback function
+         * \return
+         */
+        void multiStartTabuSearch(long long timeLimitInMilliSecs, int numStarts, const std::vector<int> &initSolution, const bqpSolver_Callback *callback);
+
+        /**
+         * Solves the BQP using simple tabu search heuristic
+         * \param starting: A starting solution
+         * \param startingObjective: The objective function value for the starting solution
+         * \param ZCoeff: Parameter used to define the max number of iterations
+         * \param timeLimitInMilliSecs: Time limit in milli seconds
+         * \param callback: Optional callback function
+         * \return Best solution found
+         */
+        double simpleTabuSearch(const std::vector<int> &starting, double startingObjective, long long ZCoeff, long long timeLimitInMilliSecs, const bqpSolver_Callback *callback);
+
+        /**
+         * Solves the BQP using basic local searching
+         * \param starting: A starting solution
+         * \param startingObjective: The objective function value for the starting solution
+         * \param changeInObjective: Partial derivative values for the starting solution
+         * \return Best solution found
+         */
+        double localSearchInternal(const std::vector<int> &starting, double startingObjective, std::vector<double> &changeInObjective);
+        
+        /**
+         * Helper function to multiStartTabuSearch() function
+         * Selects variables to change and build up new solution
+         * \param numSelection: Number of variables required to be selected
+         * \param C: C matrix (refer paper for multi start tabu search by Palubeckis)
+         * \param I: Storage for selected variables
+         * \return
+         */
+        void selectVariables(int numSelection, std::vector<std::vector<double>> &C, std::vector<int> &I);
+        
+        /**
+         * Helper function to multiStartTabuSearch() function
+         * Uses steepest ascent to construct a new solution
+         * \param numSelection: Number of variables required to be selected
+         * \param C: C matrix (refer paper for multi start tabu search by Palubeckis)
+         * \param I: Selected variables
+         * \param solution: Solution to be updated
+         * \return
+         */
+        void steepestAscent(int numSelection, std::vector<std::vector<double>> &C, std::vector<int> &I, std::vector<int> &solution);
+
+        /**
+         * Compute the C matrix (refer to the tabu search heuristic in the paper by Palubeckis (p.262))
+         * \param C: The matrix computed
+         * \param solution: Current solution
+         * \return
+         */
+        void computeC(std::vector<std::vector<double>> &C, const std::vector<int> &solution);
+
+        /**
+         * Stores the problem, the solution, and some statistics
+         */
         BQP bqp;
+
+        /**
+         * Number of previous solutions to keep track of
+         */
+        int tabooTenure;
 };
 
 #endif

@@ -22,8 +22,3 @@ install_from_source() {
 install_pcre() {
     install_from_source "ftp://ftp.pcre.org/pub/pcre/" "pcre" "8.42"
 }
-
-install_swig() {
-    install_pcre
-    install_from_source "https://sourceforge.net/projects/swig/files/swig/swig-3.0.12/" "swig" "3.0.12"
-}

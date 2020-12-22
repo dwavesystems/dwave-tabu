@@ -22,6 +22,7 @@ import dimod
 
 import tabu
 
+import numpy as np
 
 try:
     perf_counter = time.perf_counter
@@ -68,7 +69,7 @@ class RunTimeAssertionMixin(object):
 class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
 
     def test_trivial(self):
-        qubo = [[1]]
+        qubo = [[1.0]]
         init = [1]
         tenure = len(init) - 1
         timeout = 1
@@ -82,8 +83,8 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         self.assertEqual(energy, 0.0)
 
     def test_correctness(self):
-        qubo = [[2, 1, 1], [1, 2, 1], [1, 1, 2]]
-        init = [1, 1, 1]
+        qubo = [[-1.2, 1.1], [1.1, -1.2]]
+        init = [1, 1]
         tenure = len(init) - 1
         timeout = 20
 
@@ -92,22 +93,22 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         solution = list(search.bestSolution())
         energy = search.bestEnergy()
 
-        self.assertEqual(solution, [0, 0, 0])
-        self.assertEqual(energy, 0.0)
+        self.assertEqual(solution, [0, 1])
+        self.assertEqual(energy, -1.2)
 
     def test_concurrency(self):
 
         def search(timeout):
-            return tabu.TabuSearch([[1]], [1], 0, timeout).bestEnergy()
+            return tabu.TabuSearch([[1.0]], [1], 0, timeout).bestEnergy()
 
         with ThreadPoolExecutor(max_workers=3) as executor:
 
             # ~ 500 ms (but be gracious on slow CI VMs)
-            with self.assertRuntimeWithin(400, 1400):
+            with self.assertRuntimeWithin(400, 1600):
                 wait([executor.submit(search, timeout=500) for _ in range(3)])
 
             # ~ 1000 ms (but be gracious on slow CI VMs)
-            with self.assertRuntimeWithin(900, 1900):
+            with self.assertRuntimeWithin(900, 2100):
                 wait([executor.submit(search, timeout=500) for _ in range(4)])
 
     def test_float(self):
@@ -125,3 +126,18 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         Q, _ = tabu.TabuSampler._bqm_to_tabu_qubo(bqm)
         search = tabu.TabuSearch(Q, init, tenure, timeout)
         self.assertAlmostEqual(search.bestEnergy(), -14.65986790)
+
+    def test_exceptions(self):
+        qubo = [[-1.2, 1.1], [1.1, -1.2]]
+
+        # Wrong length for init_solution
+        with self.assertRaises(RuntimeError):
+            init = [1, 1, 1]
+            tenure = len(init) - 1
+            search = tabu.TabuSearch(qubo, init, tenure, 10)
+
+        # Tenure out of bounds
+        with self.assertRaises(RuntimeError):
+            init = [1, 1]
+            tenure = 3
+            search = tabu.TabuSearch(qubo, init, tenure, 10)
