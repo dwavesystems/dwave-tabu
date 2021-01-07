@@ -20,6 +20,7 @@ import dimod
 
 import tabu
 
+import numpy as np
 
 @dimod.testing.load_sampler_bqm_tests(tabu.TabuSampler)
 class TestTabuSampler(unittest.TestCase):
@@ -200,3 +201,27 @@ class TestTabuSampler(unittest.TestCase):
 
         # if explicitly given, without initial_states, they are generated
         self.assertEqual(len(tabu.TabuSampler().sample(bqm, num_reads=4)), 4)
+
+    def test_seed(self):
+        sampler = tabu.TabuSampler()
+
+        num_vars = 40
+        h = {v: -1 for v in range(num_vars)}
+        J = {(u, v): -1 for u in range(num_vars) for v in range(u, num_vars) if u != v}
+        num_reads = 1000
+
+        all_samples = []
+
+        for seed in (1, 25, 2352):
+            response0 = sampler.sample_ising(h, J, num_reads=num_reads, num_sweeps=10, seed=seed)
+            response1 = sampler.sample_ising(h, J, num_reads=num_reads, num_sweeps=10, seed=seed)
+
+            samples0 = response0.record.sample
+            samples1 = response1.record.sample
+
+            self.assertTrue(np.array_equal(samples0, samples1), "Same seed returned different results")
+
+            for previous_sample in all_samples:
+                self.assertFalse(np.array_equal(samples0, previous_sample), "Different seed returned same results")
+
+            all_samples.append(samples0)

@@ -151,8 +151,12 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
 
         # run Tabu search
         samples = np.empty((parsed.num_reads, len(bqm)), dtype=np.int8)
+
+        rng = np.random.RandomState(seed)
+
         for ni, initial_state in enumerate(parsed_initial_states):
-            r = TabuSearch(qubo, initial_state, tenure, timeout)
+            seed_per_read = rng.randint(2**32, dtype=np.uint32)
+            r = TabuSearch(qubo, initial_state, tenure, timeout, seed_per_read)
             samples[ni, :] = r.bestSolution()
 
         # we received samples in binary form, so convert if needed

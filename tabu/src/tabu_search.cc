@@ -22,7 +22,12 @@
 using std::vector;
 using std::size_t;
 
-TabuSearch::TabuSearch(vector<vector<double>> Q, const vector<int> initSol, int tenure, long int timeout) : bqp(Q)
+TabuSearch::TabuSearch(vector<vector<double>> Q, 
+                       const vector<int> initSol, 
+                       int tenure, 
+                       long int timeout, 
+                       unsigned int seed) 
+    : bqp(Q)
 {
     size_t nvars = Q.size();
     if (initSol.size() != nvars)
@@ -36,6 +41,8 @@ TabuSearch::TabuSearch(vector<vector<double>> Q, const vector<int> initSol, int 
     else {
         tabooTenure = (20 < (int)(bqp.nVars / 4.0))? 20 : (int)(bqp.nVars / 4.0);
     }
+
+    srand(seed);
 
     // Solve and update bqp
     multiStartTabuSearch(timeout, 1000000, initSol, nullptr);
