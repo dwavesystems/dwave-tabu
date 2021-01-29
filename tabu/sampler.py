@@ -89,9 +89,9 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
                 are not provided, only one read is performed.
 
             seed (int (32-bit unsigned integer), optional):
-                Seed to use for the PRNG. Specifying a particular seed with a
-                constant set of parameters produces identical results. If not
-                provided, a random seed is chosen.
+                Seed to use for the PRNG. If the `timeout` parameter is not None, 
+                results from the same seed may not be identical between runs due to 
+                finite clock resolution.
             
             tenure (int, optional):
                 Tabu tenure, which is the length of the tabu list, or number of recently
@@ -99,8 +99,8 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
                 Default is a quarter of the number of problem variables up to
                 a maximum value of 20.
 
-            timeout (int, optional):
-                Total running time in milliseconds.
+            timeout (int, optional, default=20):
+                Total running time per read in milliseconds.
 
             init_solution (:class:`~dimod.SampleSet`, optional):
                 Deprecated. Alias for `initial_states`.
@@ -126,10 +126,10 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
             return dimod.SampleSet.from_samples([], energy=0, vartype=bqm.vartype)
 
         if tenure is None:
-            tenure = max(min(20, len(bqm) // 4), 0)
-        if not isinstance(tenure, int):
+            tenure = min(20, len(bqm) // 4)
+        elif not isinstance(tenure, int):
             raise TypeError("'tenure' should be an integer in range [0, num_vars - 1]")
-        if not 0 <= tenure < len(bqm):
+        elif not 0 <= tenure < len(bqm):
             raise ValueError("'tenure' should be an integer in range [0, num_vars - 1]")
 
         if 'init_solution' in kwargs:

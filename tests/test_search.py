@@ -126,18 +126,3 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
         Q, _ = tabu.TabuSampler._bqm_to_tabu_qubo(bqm)
         search = tabu.TabuSearch(Q, init, tenure, timeout)
         self.assertAlmostEqual(search.bestEnergy(), -14.65986790)
-
-    def test_exceptions(self):
-        qubo = [[-1.2, 1.1], [1.1, -1.2]]
-
-        # Wrong length for init_solution
-        with self.assertRaises(RuntimeError):
-            init = [1, 1, 1]
-            tenure = len(init) - 1
-            search = tabu.TabuSearch(qubo, init, tenure, 10)
-
-        # Tenure out of bounds
-        with self.assertRaises(RuntimeError):
-            init = [1, 1]
-            tenure = 3
-            search = tabu.TabuSearch(qubo, init, tenure, 10)

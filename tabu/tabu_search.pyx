@@ -26,8 +26,9 @@ cdef class TabuSearch:
     """Wraps the class `TabuSearch` from `tabu_search.cc`."""
     cdef tabu.TabuSearch *c_tabu
 
-    def __cinit__(self, object Q, object initSol, int tenure, long int timeout, object seed=None) :
+    def __cinit__(self, object Q, object initSol, int tenure, object timeout=None, object seed=None) :
         cdef unsigned int _seed = time(NULL) if seed is None else seed
+        cdef int _timeout = -1 if timeout is None else timeout
 
         cdef double[:,:] qubo = np.asarray(Q, dtype=np.double)
         cdef vector[vector[double]] Qvec
@@ -43,7 +44,7 @@ cdef class TabuSearch:
             initVec.push_back(initial[i])
 
         with nogil:
-            self.c_tabu = new tabu.TabuSearch(Qvec, initVec, tenure, timeout, _seed)
+            self.c_tabu = new tabu.TabuSearch(Qvec, initVec, tenure, _timeout, _seed)
 
     def __dealloc__(self):
         del self.c_tabu

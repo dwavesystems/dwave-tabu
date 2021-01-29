@@ -183,6 +183,10 @@ class TestTabuSampler(unittest.TestCase):
         with self.assertRaises(ValueError):
             tabu.TabuSampler().sample(bqm, initial_states_generator='non-existing')
 
+        # invalid initial_states length
+        with self.assertRaises(ValueError):
+            tabu.TabuSampler().sample(bqm, initial_states=[1, 1])
+
     def test_soft_num_reads(self):
         """Number of reads adapts to initial_states size, if provided."""
 
@@ -205,16 +209,14 @@ class TestTabuSampler(unittest.TestCase):
     def test_seed(self):
         sampler = tabu.TabuSampler()
 
-        num_vars = 40
-        h = {v: -1 for v in range(num_vars)}
-        J = {(u, v): -1 for u in range(num_vars) for v in range(u, num_vars) if u != v}
-        num_reads = 1000
+        bqm = dimod.generators.random.randint(1000, 'SPIN', seed=123)
+        tenure = len(bqm) - 1
 
         all_samples = []
-
         for seed in (1, 25, 2352):
-            response0 = sampler.sample_ising(h, J, num_reads=num_reads, num_sweeps=10, seed=seed)
-            response1 = sampler.sample_ising(h, J, num_reads=num_reads, num_sweeps=10, seed=seed)
+            # tenure specified for more reliable results
+            response0 = sampler.sample(bqm, num_reads=1, tenure=tenure, seed=seed)
+            response1 = sampler.sample(bqm, num_reads=1, tenure=tenure, seed=seed)
 
             samples0 = response0.record.sample
             samples1 = response1.record.sample
