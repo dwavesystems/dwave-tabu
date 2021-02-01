@@ -211,13 +211,12 @@ class TestTabuSampler(unittest.TestCase):
         sampler = tabu.TabuSampler()
 
         bqm = dimod.generators.random.randint(1000, 'SPIN', seed=123)
-        tenure = len(bqm) - 1
+        tenure = 5
 
         all_samples = []
         for seed in (1, 25, 2352):
-            # tenure specified for more reliable results
-            response0 = sampler.sample(bqm, num_reads=1, tenure=tenure, seed=seed)
-            response1 = sampler.sample(bqm, num_reads=1, tenure=tenure, seed=seed)
+            response0 = sampler.sample(bqm, num_reads=1, tenure=tenure, num_restarts=1, timeout=None, seed=seed)
+            response1 = sampler.sample(bqm, num_reads=1, tenure=tenure, num_restarts=1, timeout=None, seed=seed)
 
             samples0 = response0.record.sample
             samples1 = response1.record.sample
@@ -244,3 +243,13 @@ class TestTabuSampler(unittest.TestCase):
         end_time = time.time()
 
         self.assertAlmostEqual((end_time - start_time), 0.6, places=2)
+
+    def test_num_restarts(self):
+        sampler = tabu.TabuSampler()
+        bqm = dimod.generators.random.randint(10, 'SPIN', seed=123)
+        target_restarts = 100
+
+        response = sampler.sample(bqm, num_reads=1, timeout=None, num_restarts=target_restarts, seed=345)
+
+        num_restarts = response.record['num_restarts']  
+        self.assertEqual(target_restarts, num_restarts)

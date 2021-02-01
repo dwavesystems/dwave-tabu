@@ -53,8 +53,8 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
         self.properties = {}
 
     def sample(self, bqm, initial_states=None, initial_states_generator='random',
-               num_reads=None, seed=None, tenure=None, timeout=20, **kwargs):
-        """Run Tabu search on a given binary quadratic model.
+               num_reads=None, seed=None, tenure=None, timeout=20, num_restarts=1000000, **kwargs):
+        """Run a multistart tabu search on a given binary quadratic model.
 
         Args:
             bqm (:class:`~dimod.BinaryQuadraticModel`):
@@ -101,6 +101,9 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
 
             timeout (int, optional, default=20):
                 Total running time per read in milliseconds.
+
+            num_restarts (int, optional, default=1,000,000):
+                Number of tabu search restarts per read.
 
             init_solution (:class:`~dimod.SampleSet`, optional):
                 Deprecated. Alias for `initial_states`.
@@ -149,15 +152,20 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
 
         qubo, varorder = self._bqm_to_tabu_qubo(bqm.binary)
 
+        if timeout is None:
+            timeout = -1    # Using negative timeout to mean ignore timeout parameter
+
         # run Tabu search
         samples = np.empty((parsed.num_reads, len(bqm)), dtype=np.int8)
 
         rng = np.random.default_rng(seed)
 
+        restarts = []
         for ni, initial_state in enumerate(parsed_initial_states):
             seed_per_read = rng.integers(2**32, dtype=np.uint32)
-            r = TabuSearch(qubo, initial_state, tenure, timeout, seed_per_read)
+            r = TabuSearch(qubo, initial_state, tenure, timeout, num_restarts, seed_per_read)
             samples[ni, :] = r.bestSolution()
+            restarts.append(r.numRestarts())
 
         # we received samples in binary form, so convert if needed
         if bqm.vartype is dimod.SPIN:
@@ -167,7 +175,8 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
             # sanity check
             raise ValueError("unknown vartype")
 
-        return dimod.SampleSet.from_samples_bqm((samples, varorder), bqm=bqm)
+        return dimod.SampleSet.from_samples_bqm((samples, varorder), bqm=bqm, num_restarts=restarts)
+
 
     @staticmethod
     def _bqm_to_tabu_qubo(bqm):

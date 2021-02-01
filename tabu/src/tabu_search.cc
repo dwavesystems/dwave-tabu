@@ -25,7 +25,8 @@ using std::size_t;
 TabuSearch::TabuSearch(vector<vector<double>> Q, 
                        const vector<int> initSol, 
                        int tenure, 
-                       long int timeout, 
+                       long int timeout,
+                       int numRestarts,
                        unsigned int seed) 
     : bqp(Q) {
     
@@ -46,7 +47,7 @@ TabuSearch::TabuSearch(vector<vector<double>> Q,
     generator.seed(seed);
 
     // Solve and update bqp
-    multiStartTabuSearch(timeout, 1000000, initSol, nullptr);
+    multiStartTabuSearch(timeout, numRestarts, initSol, nullptr);
 }
 
 double TabuSearch::bestEnergy()
@@ -59,8 +60,13 @@ vector<int> TabuSearch::bestSolution()
     return bqp.solution;
 }
 
+int TabuSearch::numRestarts()
+{
+    return bqp.restartNum;
+}
+
 void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs, 
-                                      int numStarts, 
+                                      int numRestarts, 
                                       const vector<int> &initSolution, 
                                       const bqpSolver_Callback *callback) {
 
@@ -83,7 +89,7 @@ void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs,
 
     vector<vector<double>> C(bqp.nVars, vector<double>(bqp.nVars));
 
-    for (long iter = 0; iter < numStarts; iter++) {
+    for (long iter = 0; iter < numRestarts; iter++) {
         if (useTimeLimit && (realtime_clock() - startTime) > timeLimitInMilliSecs) {
             break;
         }
@@ -111,6 +117,7 @@ void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs,
         bqp.solutionQuality = bqp.getObjective(bqp.solution);
 
         // Run taboo search and update solution again
+        bqp.restartNum++;
         simpleTabuSearch(bqp.solution, bqp.solutionQuality, Z2Coeff, timeLimitInMilliSecs - (realtime_clock() - startTime), useTimeLimit, callback);
     
         if (bestSolutionQuality > bqp.solutionQuality) {
@@ -135,8 +142,6 @@ double TabuSearch::simpleTabuSearch(const vector<int> &starting,
                                     const bqpSolver_Callback *callback) {
 
     long long startTime = realtime_clock();
-    
-    bqp.restartNum++;  // added to record more statistics
     bqp.solutionQuality = startingObjective;
 
     vector<int> taboo(bqp.nVars);  // used to keep track of history of flipped bits
