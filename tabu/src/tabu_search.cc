@@ -27,7 +27,21 @@ TabuSearch::TabuSearch(vector<vector<double>> Q,
                        int tenure, 
                        long int timeout, 
                        unsigned int seed) 
-    : bqp(Q), tabooTenure(tenure) {
+    : bqp(Q) {
+    
+    size_t nvars = Q.size();
+    if (initSol.size() != nvars)
+        throw Exception("length of init_solution doesn't match the size of Q");
+
+    if (tenure < 0 || tenure > (nvars - 1)) {
+        throw Exception("tenure must be in the range [0, num_vars - 1]");
+    }
+    else if (tenure > 0) {
+        tabooTenure = tenure;
+    }
+    else {
+        tabooTenure = (20 < (int)(bqp.nVars / 4.0))? 20 : (int)(bqp.nVars / 4.0);
+    }
 
     generator.seed(seed);
 
