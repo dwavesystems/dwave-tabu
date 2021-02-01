@@ -15,6 +15,7 @@
 """Test the TabuSampler python interface."""
 
 import unittest
+import time
 
 import dimod
 
@@ -227,3 +228,19 @@ class TestTabuSampler(unittest.TestCase):
                 self.assertFalse(np.array_equal(samples0, previous_sample), "Different seed returned same results")
 
             all_samples.append(samples0)
+
+    def test_timeout(self):
+        sampler = tabu.TabuSampler()
+        bqm = dimod.BinaryQuadraticModel.from_ising({}, {'ab': -1, 'bc': 1, 'ac': 1})
+
+        start_time = time.time()
+        response = sampler.sample(bqm, num_reads=1, timeout=500, seed=123)
+        end_time = time.time()
+
+        self.assertAlmostEqual((end_time - start_time), 0.5, places=2)
+
+        start_time = time.time()
+        response = sampler.sample(bqm, num_reads=3, timeout=200, seed=123)
+        end_time = time.time()
+
+        self.assertAlmostEqual((end_time - start_time), 0.6, places=2)
