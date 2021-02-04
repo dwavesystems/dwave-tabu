@@ -232,17 +232,17 @@ class TestTabuSampler(unittest.TestCase):
         sampler = tabu.TabuSampler()
         bqm = dimod.BinaryQuadraticModel.from_ising({}, {'ab': -1, 'bc': 1, 'ac': 1})
 
-        start_time = time.time()
+        start_time = time.perf_counter()
         response = sampler.sample(bqm, num_reads=1, timeout=500, seed=123)
-        end_time = time.time()
+        run_time = time.perf_counter() - start_time
 
-        self.assertAlmostEqual((end_time - start_time), 0.5, places=2)
+        self.assertAlmostEqual(run_time, 0.5, places=1)
 
-        start_time = time.time()
+        start_time = time.perf_counter()
         response = sampler.sample(bqm, num_reads=3, timeout=200, seed=123)
-        end_time = time.time()
+        run_time = time.perf_counter() - start_time
 
-        self.assertAlmostEqual((end_time - start_time), 0.6, places=2)
+        self.assertAlmostEqual(run_time, 0.6, places=1)
 
     def test_num_restarts(self):
         sampler = tabu.TabuSampler()
