@@ -100,8 +100,8 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
 
     def test_concurrency(self):
 
-        def search(timeout):
-            return tabu.TabuSearch([[1.0]], [1], 0, timeout, 1000000).bestEnergy()
+        def search(timeout, restarts=int(1e6)):
+            return tabu.TabuSearch([[1.0]], [1], 0, timeout, restarts).bestEnergy()
 
         with ThreadPoolExecutor(max_workers=3) as executor:
 
