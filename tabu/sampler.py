@@ -53,8 +53,8 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
         self.properties = {}
 
     def sample(self, bqm, initial_states=None, initial_states_generator='random',
-               num_reads=None, seed=None, tenure=None, timeout=20, **kwargs):
-        """Run Tabu search on a given binary quadratic model.
+               num_reads=None, seed=None, tenure=None, timeout=20, num_restarts=1000000, **kwargs):
+        """Run a multistart tabu search on a given binary quadratic model.
 
         Args:
             bqm (:class:`~dimod.BinaryQuadraticModel`):
@@ -89,9 +89,9 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
                 are not provided, only one read is performed.
 
             seed (int (32-bit unsigned integer), optional):
-                Seed to use for the PRNG. Specifying a particular seed with a
-                constant set of parameters produces identical results. If not
-                provided, a random seed is chosen.
+                Seed to use for the PRNG. If the `timeout` parameter is not None, 
+                results from the same seed may not be identical between runs due to 
+                finite clock resolution.
             
             tenure (int, optional):
                 Tabu tenure, which is the length of the tabu list, or number of recently
@@ -99,8 +99,11 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
                 Default is a quarter of the number of problem variables up to
                 a maximum value of 20.
 
-            timeout (int, optional):
-                Total running time in milliseconds.
+            timeout (int, optional, default=20):
+                Total running time per read in milliseconds.
+
+            num_restarts (int, optional, default=1,000,000):
+                Number of tabu search restarts per read.
 
             init_solution (:class:`~dimod.SampleSet`, optional):
                 Deprecated. Alias for `initial_states`.
@@ -126,10 +129,10 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
             return dimod.SampleSet.from_samples([], energy=0, vartype=bqm.vartype)
 
         if tenure is None:
-            tenure = max(min(20, len(bqm) // 4), 0)
-        if not isinstance(tenure, int):
+            tenure = min(20, len(bqm) // 4)
+        elif not isinstance(tenure, int):
             raise TypeError("'tenure' should be an integer in range [0, num_vars - 1]")
-        if not 0 <= tenure < len(bqm):
+        elif not 0 <= tenure < len(bqm):
             raise ValueError("'tenure' should be an integer in range [0, num_vars - 1]")
 
         if 'init_solution' in kwargs:
@@ -149,11 +152,20 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
 
         qubo, varorder = self._bqm_to_tabu_qubo(bqm.binary)
 
+        if timeout is None:
+            timeout = -1    # Using negative timeout to mean ignore timeout parameter
+
         # run Tabu search
         samples = np.empty((parsed.num_reads, len(bqm)), dtype=np.int8)
+
+        rng = np.random.default_rng(seed)
+
+        restarts = []
         for ni, initial_state in enumerate(parsed_initial_states):
-            r = TabuSearch(qubo, initial_state, tenure, timeout)
+            seed_per_read = rng.integers(2**32, dtype=np.uint32)
+            r = TabuSearch(qubo, initial_state, tenure, timeout, num_restarts, seed_per_read)
             samples[ni, :] = r.bestSolution()
+            restarts.append(r.numRestarts())
 
         # we received samples in binary form, so convert if needed
         if bqm.vartype is dimod.SPIN:
@@ -163,7 +175,8 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
             # sanity check
             raise ValueError("unknown vartype")
 
-        return dimod.SampleSet.from_samples_bqm((samples, varorder), bqm=bqm)
+        return dimod.SampleSet.from_samples_bqm((samples, varorder), bqm=bqm, num_restarts=restarts)
+
 
     @staticmethod
     def _bqm_to_tabu_qubo(bqm):

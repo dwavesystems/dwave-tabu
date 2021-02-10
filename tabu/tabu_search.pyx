@@ -17,6 +17,7 @@
 # limitations under the License.
 
 from libcpp.vector cimport vector
+from libc.time cimport time
 import numpy as np
 
 cimport tabu
@@ -25,7 +26,9 @@ cdef class TabuSearch:
     """Wraps the class `TabuSearch` from `tabu_search.cc`."""
     cdef tabu.TabuSearch *c_tabu
 
-    def __cinit__(self, object Q, object initSol, int tenure, long int timeout) :
+    def __cinit__(self, object Q, object initSol, int tenure, int timeout, int numRestarts, object seed=None) :
+        cdef unsigned int _seed = time(NULL) if seed is None else seed
+
         cdef double[:,:] qubo = np.asarray(Q, dtype=np.double)
         cdef vector[vector[double]] Qvec
         Qvec.resize(qubo.shape[0])
@@ -40,7 +43,7 @@ cdef class TabuSearch:
             initVec.push_back(initial[i])
 
         with nogil:
-            self.c_tabu = new tabu.TabuSearch(Qvec, initVec, tenure, timeout)
+            self.c_tabu = new tabu.TabuSearch(Qvec, initVec, tenure, timeout, numRestarts, _seed)
 
     def __dealloc__(self):
         del self.c_tabu
@@ -50,3 +53,6 @@ cdef class TabuSearch:
 
     def bestSolution(self):
         return self.c_tabu.bestSolution()
+
+    def numRestarts(self):
+        return self.c_tabu.numRestarts()

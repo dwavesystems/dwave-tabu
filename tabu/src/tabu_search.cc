@@ -22,14 +22,21 @@
 using std::vector;
 using std::size_t;
 
-TabuSearch::TabuSearch(vector<vector<double>> Q, const vector<int> initSol, int tenure, long int timeout) : bqp(Q)
-{
+TabuSearch::TabuSearch(vector<vector<double>> Q, 
+                       const vector<int> initSol, 
+                       int tenure, 
+                       long int timeout,
+                       int numRestarts,
+                       unsigned int seed) 
+    : bqp(Q) {
+    
     size_t nvars = Q.size();
     if (initSol.size() != nvars)
         throw Exception("length of init_solution doesn't match the size of Q");
 
-    if (tenure < 0 || tenure > (nvars - 1))
+    if (tenure < 0 || tenure > (nvars - 1)) {
         throw Exception("tenure must be in the range [0, num_vars - 1]");
+    }
     else if (tenure > 0) {
         tabooTenure = tenure;
     }
@@ -37,8 +44,10 @@ TabuSearch::TabuSearch(vector<vector<double>> Q, const vector<int> initSol, int 
         tabooTenure = (20 < (int)(bqp.nVars / 4.0))? 20 : (int)(bqp.nVars / 4.0);
     }
 
+    generator.seed(seed);
+
     // Solve and update bqp
-    multiStartTabuSearch(timeout, 1000000, initSol, nullptr);
+    multiStartTabuSearch(timeout, numRestarts, initSol, nullptr);
 }
 
 double TabuSearch::bestEnergy()
@@ -51,8 +60,13 @@ vector<int> TabuSearch::bestSolution()
     return bqp.solution;
 }
 
+int TabuSearch::numRestarts()
+{
+    return bqp.restartNum;
+}
+
 void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs, 
-                                      int numStarts, 
+                                      int numRestarts, 
                                       const vector<int> &initSolution, 
                                       const bqpSolver_Callback *callback) {
 
@@ -66,14 +80,20 @@ void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs,
 
     bqp.initialize(initSolution);
 
-    simpleTabuSearch(bqp.solution, bqp.solutionQuality, Z1Coeff, timeLimitInMilliSecs, callback);
+    bool useTimeLimit = timeLimitInMilliSecs >= 0;
+
+    simpleTabuSearch(bqp.solution, bqp.solutionQuality, Z1Coeff, timeLimitInMilliSecs, useTimeLimit, callback);
 
     double bestSolutionQuality = bqp.solutionQuality;
     vector<int> bestSolution(bqp.solution.begin(), bqp.solution.end());
 
     vector<vector<double>> C(bqp.nVars, vector<double>(bqp.nVars));
 
-    for (long iter = 0; iter < numStarts && ((realtime_clock() - startTime) < timeLimitInMilliSecs); iter++) {    
+    for (long iter = 0; iter < numRestarts; iter++) {
+        if (useTimeLimit && (realtime_clock() - startTime) > timeLimitInMilliSecs) {
+            break;
+        }
+
         // Compute coefficients from current solution (used later to get solution from steepestAscent())
         computeC(C, bqp.solution);
 
@@ -97,7 +117,8 @@ void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs,
         bqp.solutionQuality = bqp.getObjective(bqp.solution);
 
         // Run taboo search and update solution again
-        simpleTabuSearch(bqp.solution, bqp.solutionQuality, Z2Coeff, timeLimitInMilliSecs - (realtime_clock() - startTime), callback);
+        bqp.restartNum++;
+        simpleTabuSearch(bqp.solution, bqp.solutionQuality, Z2Coeff, timeLimitInMilliSecs - (realtime_clock() - startTime), useTimeLimit, callback);
     
         if (bestSolutionQuality > bqp.solutionQuality) {
             bestSolutionQuality = bqp.solutionQuality;
@@ -117,11 +138,10 @@ double TabuSearch::simpleTabuSearch(const vector<int> &starting,
                                     double startingObjective,
                                     long long ZCoeff,
                                     long long timeLimitInMilliSecs,
+                                    bool useTimeLimit,
                                     const bqpSolver_Callback *callback) {
 
     long long startTime = realtime_clock();
-    
-    bqp.restartNum++;  // added to record more statistics
     bqp.solutionQuality = startingObjective;
 
     vector<int> taboo(bqp.nVars);  // used to keep track of history of flipped bits
@@ -143,7 +163,10 @@ double TabuSearch::simpleTabuSearch(const vector<int> &starting,
     long long iter = 0;
     long long maxIter = (500000 > ZCoeff * (long long)bqp.nVars)? 500000 : ZCoeff * (long long)bqp.nVars;
 
-    while (iter < maxIter && (realtime_clock() - startTime) < timeLimitInMilliSecs) {
+    while (iter < maxIter) {
+        if (useTimeLimit && (realtime_clock() - startTime) > timeLimitInMilliSecs) {
+            break;
+        }
         bqp.iterNum++; // added to record more statistics
         double localMinCost = std::numeric_limits<double>::max();
         int bestK = -1;
@@ -175,7 +198,7 @@ double TabuSearch::simpleTabuSearch(const vector<int> &starting,
         }
 
         if (!globalMinFound && numTies > 1) {
-            bestK = numTies * (double)(rand())/((double)(RAND_MAX)+1);
+            bestK = numTies * (double)generator() / ((double)generator.max() + 1);
             bestK = tieList[bestK];
         }
         for (int i = 0; i < bqp.nVars; i++) {
@@ -317,7 +340,7 @@ void TabuSearch::selectVariables(int numSelection, vector<vector<double>> &C, ve
                 }
             }
         }
-        double selectedProb = (double)rand() / ((double)RAND_MAX + 1);
+        double selectedProb = (double)generator() / ((double)generator.max() + 1);
         int selectedVar = -1;
         for (int i = 0; i < bqp.nVars; i++) {
             if (selected[i] == 1) {

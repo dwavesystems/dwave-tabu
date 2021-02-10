@@ -77,8 +77,8 @@ class BQP
         unsigned long long nIterations;         // Number of iterations required to arrive at solution
 
         /*added to record more statistics.*/
-        unsigned long long restartNum;
-        unsigned long long iterNum;
+        unsigned long long restartNum;  // Number of times simpleTabuSearch runs
+        unsigned long long iterNum;     // Number of times loop within simpleTabuSearch runs
         unsigned long long evalNum;
         double upperBound;
 };

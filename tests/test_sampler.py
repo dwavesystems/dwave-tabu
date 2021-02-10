@@ -15,11 +15,13 @@
 """Test the TabuSampler python interface."""
 
 import unittest
+import time
 
 import dimod
 
 import tabu
 
+import numpy as np
 
 @dimod.testing.load_sampler_bqm_tests(tabu.TabuSampler)
 class TestTabuSampler(unittest.TestCase):
@@ -182,6 +184,10 @@ class TestTabuSampler(unittest.TestCase):
         with self.assertRaises(ValueError):
             tabu.TabuSampler().sample(bqm, initial_states_generator='non-existing')
 
+        # invalid initial_states length
+        with self.assertRaises(ValueError):
+            tabu.TabuSampler().sample(bqm, initial_states=[1, 1])
+
     def test_soft_num_reads(self):
         """Number of reads adapts to initial_states size, if provided."""
 
@@ -200,3 +206,50 @@ class TestTabuSampler(unittest.TestCase):
 
         # if explicitly given, without initial_states, they are generated
         self.assertEqual(len(tabu.TabuSampler().sample(bqm, num_reads=4)), 4)
+
+    def test_seed(self):
+        sampler = tabu.TabuSampler()
+
+        bqm = dimod.generators.random.randint(1000, 'SPIN', seed=123)
+        tenure = 5
+
+        all_samples = []
+        for seed in (1, 25, 2352):
+            response0 = sampler.sample(bqm, num_reads=1, tenure=tenure, num_restarts=1, timeout=None, seed=seed)
+            response1 = sampler.sample(bqm, num_reads=1, tenure=tenure, num_restarts=1, timeout=None, seed=seed)
+
+            samples0 = response0.record.sample
+            samples1 = response1.record.sample
+
+            self.assertTrue(np.array_equal(samples0, samples1), "Same seed returned different results")
+
+            for previous_sample in all_samples:
+                self.assertFalse(np.array_equal(samples0, previous_sample), "Different seed returned same results")
+
+            all_samples.append(samples0)
+
+    def test_timeout(self):
+        sampler = tabu.TabuSampler()
+        bqm = dimod.BinaryQuadraticModel.from_ising({}, {'ab': -1, 'bc': 1, 'ac': 1})
+
+        start_time = time.perf_counter()
+        response = sampler.sample(bqm, num_reads=1, timeout=500, seed=123)
+        run_time = time.perf_counter() - start_time
+
+        self.assertAlmostEqual(run_time, 0.5, places=1)
+
+        start_time = time.perf_counter()
+        response = sampler.sample(bqm, num_reads=3, timeout=200, seed=123)
+        run_time = time.perf_counter() - start_time
+
+        self.assertAlmostEqual(run_time, 0.6, places=1)
+
+    def test_num_restarts(self):
+        sampler = tabu.TabuSampler()
+        bqm = dimod.generators.random.randint(10, 'SPIN', seed=123)
+        target_restarts = 100
+
+        response = sampler.sample(bqm, num_reads=1, timeout=None, num_restarts=target_restarts, seed=345)
+
+        num_restarts = response.record['num_restarts']  
+        self.assertEqual(target_restarts, num_restarts)

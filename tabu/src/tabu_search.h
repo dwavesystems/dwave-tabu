@@ -19,6 +19,7 @@
 #define ALPHA 0.4
 
 #include <vector>
+#include <random>
 
 #include "bqp.h"
 
@@ -30,9 +31,10 @@ typedef struct bqpSolver_Callback {
 class TabuSearch
 {
     public:
-        TabuSearch(std::vector<std::vector<double>> Q, const std::vector<int> initSol, int tenure, long int timeout);
+        TabuSearch(std::vector<std::vector<double>> Q, const std::vector<int> initSol, int tenure, long int timeout, int numRestarts, unsigned int seed);
         double bestEnergy();
         std::vector<int> bestSolution();
+        int numRestarts();
 
     private:
         /**
@@ -51,10 +53,11 @@ class TabuSearch
          * \param startingObjective: The objective function value for the starting solution
          * \param ZCoeff: Parameter used to define the max number of iterations
          * \param timeLimitInMilliSecs: Time limit in milli seconds
+         * \param useTimeLimit: If false, timeLimitInMilliSecs is ignored
          * \param callback: Optional callback function
          * \return Best solution found
          */
-        double simpleTabuSearch(const std::vector<int> &starting, double startingObjective, long long ZCoeff, long long timeLimitInMilliSecs, const bqpSolver_Callback *callback);
+        double simpleTabuSearch(const std::vector<int> &starting, double startingObjective, long long ZCoeff, long long timeLimitInMilliSecs, bool useTimeLimit, const bqpSolver_Callback *callback);
 
         /**
          * Solves the BQP using basic local searching
@@ -103,6 +106,11 @@ class TabuSearch
          * Number of previous solutions to keep track of
          */
         int tabooTenure;
+
+        /**
+         * RNG
+         */
+        std::default_random_engine generator;
 };
 
 #endif
