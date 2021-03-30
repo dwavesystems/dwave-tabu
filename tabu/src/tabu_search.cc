@@ -27,7 +27,8 @@ TabuSearch::TabuSearch(vector<vector<double>> Q,
                        int tenure, 
                        long int timeout,
                        int numRestarts,
-                       unsigned int seed) 
+                       unsigned int seed,
+                       double energyThreshold) 
     : bqp(Q) {
     
     size_t nvars = Q.size();
@@ -47,7 +48,7 @@ TabuSearch::TabuSearch(vector<vector<double>> Q,
     generator.seed(seed);
 
     // Solve and update bqp
-    multiStartTabuSearch(timeout, numRestarts, initSol, nullptr);
+    multiStartTabuSearch(timeout, numRestarts, energyThreshold, initSol, nullptr);
 }
 
 double TabuSearch::bestEnergy()
@@ -67,6 +68,7 @@ int TabuSearch::numRestarts()
 
 void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs, 
                                       int numRestarts, 
+                                      double energyThreshold,
                                       const vector<int> &initSolution, 
                                       const bqpSolver_Callback *callback) {
 
@@ -90,7 +92,8 @@ void TabuSearch::multiStartTabuSearch(long long timeLimitInMilliSecs,
     vector<vector<double>> C(bqp.nVars, vector<double>(bqp.nVars));
 
     for (long iter = 0; iter < numRestarts; iter++) {
-        if (useTimeLimit && (realtime_clock() - startTime) > timeLimitInMilliSecs) {
+        if ((bestSolutionQuality <= energyThreshold) ||
+            (useTimeLimit && (realtime_clock() - startTime) > timeLimitInMilliSecs)) {
             break;
         }
 

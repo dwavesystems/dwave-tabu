@@ -31,7 +31,13 @@ typedef struct bqpSolver_Callback {
 class TabuSearch
 {
     public:
-        TabuSearch(std::vector<std::vector<double>> Q, const std::vector<int> initSol, int tenure, long int timeout, int numRestarts, unsigned int seed);
+        TabuSearch(std::vector<std::vector<double>> Q, 
+                   const std::vector<int> initSol, 
+                   int tenure, 
+                   long int timeout, 
+                   int numRestarts, 
+                   unsigned int seed, 
+                   double energyThreshold);
         double bestEnergy();
         std::vector<int> bestSolution();
         int numRestarts();
@@ -39,13 +45,18 @@ class TabuSearch
     private:
         /**
          * Simple tabu search solver with multi starts. Updates bqp with best solution found.
-         * \param timLimitInMilliSecs: Time limit in milli seconds
+         * \param timeLimitInMilliSecs: Time limit in milliseconds
          * \param numStarts: Number of re starts
+         * \param energyThreshold: Search terminates if energy threshold is surpassed
          * \param initSolution: Starting solution to start search from
          * \param callback: Optional callback function
          * \return
          */
-        void multiStartTabuSearch(long long timeLimitInMilliSecs, int numStarts, const std::vector<int> &initSolution, const bqpSolver_Callback *callback);
+        void multiStartTabuSearch(long long timeLimitInMilliSecs, 
+                                  int numStarts, 
+                                  double energyThreshold,
+                                  const std::vector<int> &initSolution, 
+                                  const bqpSolver_Callback *callback);
 
         /**
          * Solves the BQP using simple tabu search heuristic
@@ -57,7 +68,12 @@ class TabuSearch
          * \param callback: Optional callback function
          * \return Best solution found
          */
-        double simpleTabuSearch(const std::vector<int> &starting, double startingObjective, long long ZCoeff, long long timeLimitInMilliSecs, bool useTimeLimit, const bqpSolver_Callback *callback);
+        double simpleTabuSearch(const std::vector<int> &starting, 
+                                double startingObjective, 
+                                long long ZCoeff, 
+                                long long timeLimitInMilliSecs, 
+                                bool useTimeLimit, 
+                                const bqpSolver_Callback *callback);
 
         /**
          * Solves the BQP using basic local searching
@@ -66,7 +82,9 @@ class TabuSearch
          * \param changeInObjective: Partial derivative values for the starting solution
          * \return Best solution found
          */
-        double localSearchInternal(const std::vector<int> &starting, double startingObjective, std::vector<double> &changeInObjective);
+        double localSearchInternal(const std::vector<int> &starting, 
+                                   double startingObjective, 
+                                   std::vector<double> &changeInObjective);
         
         /**
          * Helper function to multiStartTabuSearch() function
@@ -76,7 +94,9 @@ class TabuSearch
          * \param I: Storage for selected variables
          * \return
          */
-        void selectVariables(int numSelection, std::vector<std::vector<double>> &C, std::vector<int> &I);
+        void selectVariables(int numSelection, 
+                             std::vector<std::vector<double>> &C, 
+                             std::vector<int> &I);
         
         /**
          * Helper function to multiStartTabuSearch() function
@@ -87,7 +107,10 @@ class TabuSearch
          * \param solution: Solution to be updated
          * \return
          */
-        void steepestAscent(int numSelection, std::vector<std::vector<double>> &C, std::vector<int> &I, std::vector<int> &solution);
+        void steepestAscent(int numSelection, 
+                            std::vector<std::vector<double>> &C, 
+                            std::vector<int> &I, 
+                            std::vector<int> &solution);
 
         /**
          * Compute the C matrix (refer to the tabu search heuristic in the paper by Palubeckis (p.262))

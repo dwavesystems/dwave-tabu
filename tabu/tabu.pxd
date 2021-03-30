@@ -16,7 +16,13 @@ from libcpp.vector cimport vector
 
 cdef extern from "tabu_search.h" nogil:
     cdef cppclass TabuSearch:
-        TabuSearch(vector[vector[double]] Q, const vector[int] initSol, int tenure, long int timeout, int numRestarts, unsigned int seed) except +
+        TabuSearch(vector[vector[double]] Q, 
+                   const vector[int] initSol, 
+                   int tenure, 
+                   long int timeout, 
+                   int numRestarts, 
+                   unsigned int seed, 
+                   double energyThreshold) except +
         double bestEnergy()
         vector[int] bestSolution()
         int numRestarts()

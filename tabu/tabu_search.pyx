@@ -18,6 +18,7 @@
 
 from libcpp.vector cimport vector
 from libc.time cimport time
+from libcpp.limits cimport numeric_limits
 import numpy as np
 
 cimport tabu
@@ -26,8 +27,16 @@ cdef class TabuSearch:
     """Wraps the class `TabuSearch` from `tabu_search.cc`."""
     cdef tabu.TabuSearch *c_tabu
 
-    def __cinit__(self, object Q, object initSol, int tenure, int timeout, int numRestarts, object seed=None) :
+    def __cinit__(self, 
+                  object Q, 
+                  object initSol, 
+                  int tenure, 
+                  int timeout, 
+                  int numRestarts, 
+                  object seed=None, 
+                  object energyThreshold=None) :
         cdef unsigned int _seed = time(NULL) if seed is None else seed
+        cdef double _energyThreshold = -numeric_limits[double].max() if energyThreshold is None else energyThreshold
 
         cdef double[:,:] qubo = np.asarray(Q, dtype=np.double)
         cdef vector[vector[double]] Qvec
@@ -43,7 +52,7 @@ cdef class TabuSearch:
             initVec.push_back(initial[i])
 
         with nogil:
-            self.c_tabu = new tabu.TabuSearch(Qvec, initVec, tenure, timeout, numRestarts, _seed)
+            self.c_tabu = new tabu.TabuSearch(Qvec, initVec, tenure, timeout, numRestarts, _seed, _energyThreshold)
 
     def __dealloc__(self):
         del self.c_tabu
