@@ -18,13 +18,12 @@ import unittest
 import time
 
 import dimod
-
 import tabu
-
 import numpy as np
+from hybrid.testing import RunTimeAssertionMixin
 
 @dimod.testing.load_sampler_bqm_tests(tabu.TabuSampler)
-class TestTabuSampler(unittest.TestCase):
+class TestTabuSampler(unittest.TestCase, RunTimeAssertionMixin):
 
     def test_instantiation(self):
         sampler = tabu.TabuSampler()
@@ -253,3 +252,12 @@ class TestTabuSampler(unittest.TestCase):
 
         num_restarts = response.record['num_restarts']  
         self.assertEqual(target_restarts, num_restarts)
+
+    def test_energy_threshold(self):
+        sampler = tabu.TabuSampler()
+        bqm = dimod.generators.random.randint(100, 'SPIN', seed=123)
+        energy_threshold = -400
+
+        with self.assertRuntimeWithin(0, 1000):
+            # Expect that energy_threshold is met before timeout
+            response = sampler.sample(bqm, timeout=100000, energy_threshold=energy_threshold, seed=345)

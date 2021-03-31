@@ -19,52 +19,15 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor, wait
 
 import dimod
-
 import tabu
-
 import numpy as np
+from hybrid.testing import RunTimeAssertionMixin
 
 try:
     perf_counter = time.perf_counter
 except AttributeError:  # pragma: no cover
     # python 2
     perf_counter = time.time
-
-class RunTimeAssertionMixin(object):
-
-    class assertRuntimeWithin(object):
-
-        def __init__(self, low, high):
-            """Min/max runtime in milliseconds."""
-            self.limits = (low, high)
-
-        def __enter__(self):
-            self.tick = perf_counter()
-            return self
-
-        def __exit__(self, exc_type, exc_value, traceback):
-            self.dt = (perf_counter() - self.tick) * 1000.0
-            self.test()
-
-        def test(self):
-            low, high = self.limits
-            if low is not None and self.dt < low:
-                raise AssertionError("Min runtime unreached: %g ms < %g ms" % (self.dt, low))
-            if high is not None and self.dt > high:
-                raise AssertionError("Max runtime exceeded: %g ms > %g ms" % (self.dt, high))
-
-    class assertMinRuntime(assertRuntimeWithin):
-
-        def __init__(self, t):
-            """Min runtime in milliseconds."""
-            self.limits = (t, None)
-
-    class assertMaxRuntime(assertRuntimeWithin):
-
-        def __init__(self, t):
-            """Max runtime in milliseconds."""
-            self.limits = (None, t)
-
 
 class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
 
