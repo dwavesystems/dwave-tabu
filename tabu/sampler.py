@@ -107,7 +107,7 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
                 Number of tabu search restarts per read.
 
             energy_threshold (float, optional):
-                Terminate when this energy threshold is surpassed.
+                Terminate when an energy lower than ``energy_threshold`` is found.
 
             init_solution (:class:`~dimod.SampleSet`, optional):
                 Deprecated. Alias for `initial_states`.
