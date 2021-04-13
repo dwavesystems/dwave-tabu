@@ -18,7 +18,6 @@
 
 from libcpp.vector cimport vector
 from libc.time cimport time
-from libcpp.limits cimport numeric_limits
 import numpy as np
 
 cimport tabu
@@ -36,7 +35,7 @@ cdef class TabuSearch:
                   object seed=None, 
                   object energyThreshold=None) :
         cdef unsigned int _seed = time(NULL) if seed is None else seed
-        cdef double _energyThreshold = -numeric_limits[double].max() if energyThreshold is None else energyThreshold
+        cdef double _energyThreshold = -np.inf if energyThreshold is None else energyThreshold
 
         cdef double[:,:] qubo = np.asarray(Q, dtype=np.double)
         cdef vector[vector[double]] Qvec
