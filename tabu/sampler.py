@@ -53,7 +53,8 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
         self.properties = {}
 
     def sample(self, bqm, initial_states=None, initial_states_generator='random',
-               num_reads=None, seed=None, tenure=None, timeout=20, num_restarts=1000000, **kwargs):
+               num_reads=None, seed=None, tenure=None, timeout=20, num_restarts=1000000, 
+               energy_threshold=None, **kwargs):
         """Run a multistart tabu search on a given binary quadratic model.
 
         Args:
@@ -104,6 +105,9 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
 
             num_restarts (int, optional, default=1,000,000):
                 Number of tabu search restarts per read.
+
+            energy_threshold (float, optional):
+                Terminate when an energy lower than ``energy_threshold`` is found.
 
             init_solution (:class:`~dimod.SampleSet`, optional):
                 Deprecated. Alias for `initial_states`.
@@ -163,7 +167,7 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
         restarts = []
         for ni, initial_state in enumerate(parsed_initial_states):
             seed_per_read = rng.integers(2**32, dtype=np.uint32)
-            r = TabuSearch(qubo, initial_state, tenure, timeout, num_restarts, seed_per_read)
+            r = TabuSearch(qubo, initial_state, tenure, timeout, num_restarts, seed_per_read, energy_threshold)
             samples[ni, :] = r.bestSolution()
             restarts.append(r.numRestarts())
 
