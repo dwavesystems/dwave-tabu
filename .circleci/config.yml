@@ -60,6 +60,12 @@ jobs:
             python setup.py install
             make -C docs/ doctest
 
+      - run:
+          name: linkcheck
+          command: |
+            . env/bin/activate
+            make -C docs/ linkcheck
+
       - run: &sdist-build-template
           name: build sdist
           command: |
@@ -108,10 +114,10 @@ jobs:
 
     working_directory: ~/repo
 
-    steps: 
+    steps:
       - checkout
 
-      - run: 
+      - run:
           name: install pyenv
           command: |
             HOMEBREW_NO_AUTO_UPDATE=1 brew install pyenv
@@ -145,7 +151,7 @@ jobs:
       - save_cache: *save-cache-template
 
       - run: *install-package-template
-        
+
       - run: *run-tests-template
 
       - run: *sdist-build-template
@@ -257,10 +263,10 @@ jobs:
 
     working_directory: ~/repo
 
-    steps: 
+    steps:
       - checkout
 
-      - run: 
+      - run:
           name: install pyenv
           command: |
             HOME_NO_AUTO_UPDATE=1 brew install pyenv
@@ -290,7 +296,7 @@ jobs:
       - run: *install-dependencies-template
 
       - run: *install-package-template
-        
+
       - run: *wheel-build-template
 
       - store_artifacts:
