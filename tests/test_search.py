@@ -14,7 +14,6 @@
 
 """Test the (private) TabuSearch python interface."""
 
-import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor, wait
 

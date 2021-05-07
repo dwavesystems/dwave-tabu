@@ -209,7 +209,9 @@ class TestTabuSampler(unittest.TestCase, RunTimeAssertionMixin):
     def test_seed(self):
         sampler = tabu.TabuSampler()
 
-        bqm = dimod.generators.random.randint(1000, 'SPIN', seed=123)
+        # use a bqm with a huge plateau (extreme ground state degeneracy)
+        # to give the tabu sampler many chances of flipping (exercising rng)
+        bqm = dimod.generators.random.randint(10, dimod.SPIN, low=1, high=1)
         tenure = 5
 
         all_samples = []
