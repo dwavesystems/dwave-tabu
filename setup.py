@@ -3,6 +3,7 @@ from io import open
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
+
 class cythonizing_build_ext(build_ext):
     """Cython extensions adaptive build: cythonize if possible, include numpy
     headers, add custom compile/link flags."""

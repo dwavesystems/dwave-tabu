@@ -37,8 +37,17 @@ Install from a wheel on PyPI::
 
     pip install dwave-tabu
 
-Alternatively, you can build the library with setuptools. This build requires that
-your system has a C++ compiler toolchain installed, as well as `SWIG <http://www.swig.org/>`_.
+or install from source:
+
+.. code-block:: bash
+
+    USE_CYTHON=1 pip install git+https://github.com/dwavesystems/dwave-tabu.git#egg=dwave-tabu
+
+Note: ``USE_CYTHON=1`` forces Cythonization and proper build from source. When
+building from *PyPI package* source (which includes Cythonized files), this is
+not necessary.
+
+To build from source:
 
 .. code-block:: bash
 
