@@ -99,10 +99,6 @@ class TestTabuSampler(unittest.TestCase, RunTimeAssertionMixin):
         resp = tabu.TabuSampler().sample(bqm, initial_states=init)
         dimod.testing.assert_response_energies(resp, bqm)
 
-        # test the deprecated syntax too
-        resp = tabu.TabuSampler().sample(bqm, init_solution=init)
-        dimod.testing.assert_response_energies(resp, bqm)
-
     def test_initial_states_generator(self):
         bqm = dimod.BinaryQuadraticModel.from_ising({}, {'ab': -1, 'bc': 1, 'ac': 1})
         init = dimod.SampleSet.from_samples_bqm([{'a': 1, 'b': 1, 'c': 1},
