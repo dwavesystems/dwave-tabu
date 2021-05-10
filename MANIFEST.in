@@ -1,0 +1,1 @@
+recursive-include tabu *.h *.cpp *.pxd *.pyx

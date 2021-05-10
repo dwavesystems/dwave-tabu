@@ -1,6 +1,6 @@
 # distutils: language = c++
 # distutils: include_dirs = tabu/src/
-# distutils: sources = tabu/src/tabu_search.cc
+# distutils: sources = tabu/src/tabu_search.cpp
 
 # Copyright 2020 D-Wave Systems Inc.
 #
@@ -22,18 +22,20 @@ import numpy as np
 
 cimport tabu
 
+
 cdef class TabuSearch:
-    """Wraps the class `TabuSearch` from `tabu_search.cc`."""
+    """Wraps the class `TabuSearch` from `src/tabu_search.cpp`."""
+
     cdef tabu.TabuSearch *c_tabu
 
-    def __cinit__(self, 
-                  object Q, 
-                  object initSol, 
-                  int tenure, 
-                  int timeout, 
-                  int numRestarts, 
-                  object seed=None, 
-                  object energyThreshold=None) :
+    def __cinit__(self,
+                  object Q,
+                  object initSol,
+                  int tenure,
+                  int timeout,
+                  int numRestarts,
+                  object seed=None,
+                  object energyThreshold=None):
         cdef unsigned int _seed = time(NULL) if seed is None else seed
         cdef double _energyThreshold = -np.inf if energyThreshold is None else energyThreshold
 
@@ -45,13 +47,14 @@ cdef class TabuSearch:
             for j in range(qubo.shape[1]):
                 Qvec[i].push_back(qubo[i, j])
 
-        cdef int[:] initial = np.asarray(initSol, dtype=np.intc)  
+        cdef int[:] initial = np.asarray(initSol, dtype=np.intc)
         cdef vector[int] initVec
         for i in range(len(initial)):
             initVec.push_back(initial[i])
 
         with nogil:
-            self.c_tabu = new tabu.TabuSearch(Qvec, initVec, tenure, timeout, numRestarts, _seed, _energyThreshold)
+            self.c_tabu = new tabu.TabuSearch(
+                Qvec, initVec, tenure, timeout, numRestarts, _seed, _energyThreshold)
 
     def __dealloc__(self):
         del self.c_tabu

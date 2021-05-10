@@ -4,9 +4,8 @@ dist/
 *.pyc
 __pycache__/
 
-_tabu_search.*so
-tabu_search_wrap.cpp
-tabu_search.py
+tabu_search.*so
+tabu/tabu_search.cpp
 
 .coverage
 

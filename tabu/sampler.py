@@ -14,7 +14,6 @@
 
 """A dimod :term:`sampler` that uses the MST2 multistart tabu search algorithm."""
 
-
 import random
 import warnings
 import itertools
@@ -26,6 +25,7 @@ import dimod
 from tabu import TabuSearch
 
 __all__ = ["TabuSampler"]
+
 
 class TabuSampler(dimod.Sampler, dimod.Initialized):
     """A tabu-search sampler.

@@ -14,7 +14,6 @@
 
 """Test the (private) TabuSearch python interface."""
 
-import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor, wait
 
@@ -23,11 +22,6 @@ import tabu
 import numpy as np
 from hybrid.testing import RunTimeAssertionMixin
 
-try:
-    perf_counter = time.perf_counter
-except AttributeError:  # pragma: no cover
-    # python 2
-    perf_counter = time.time
 
 class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
 

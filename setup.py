@@ -3,6 +3,7 @@ from io import open
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
+
 class cythonizing_build_ext(build_ext):
     """Cython extensions adaptive build: cythonize if possible, include numpy
     headers, add custom compile/link flags."""
@@ -97,14 +98,13 @@ classifiers = [
     'Operating System :: OS Independent',
     'Development Status :: 3 - Alpha',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
 ]
 
-python_requires = '>=3.5'
+python_requires = '>=3.6'
 
 setup(
     name=package_info['__packagename__'],
