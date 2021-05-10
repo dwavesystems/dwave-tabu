@@ -48,8 +48,7 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
     def __init__(self):
         self.parameters = {'tenure': [],
                            'timeout': [],
-                           'num_reads': [],
-                           'init_solution': []}
+                           'num_reads': []}
         self.properties = {}
 
     def sample(self, bqm, initial_states=None, initial_states_generator='random',
@@ -109,9 +108,6 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
             energy_threshold (float, optional):
                 Terminate when an energy lower than ``energy_threshold`` is found.
 
-            init_solution (:class:`~dimod.SampleSet`, optional):
-                Deprecated. Alias for `initial_states`.
-
         Returns:
             :obj:`~dimod.SampleSet`: A `dimod` :obj:`.~dimod.SampleSet` object.
 
@@ -138,12 +134,6 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
             raise TypeError("'tenure' should be an integer in range [0, num_vars - 1]")
         elif not 0 <= tenure < len(bqm):
             raise ValueError("'tenure' should be an integer in range [0, num_vars - 1]")
-
-        if 'init_solution' in kwargs:
-            warnings.warn(
-                "'init_solution' is deprecated in favor of 'initial_states'.",
-                DeprecationWarning)
-            initial_states = kwargs.pop('init_solution')
 
         # Get initial_states in binary form
         parsed = self.parse_initial_states(bqm.binary, 
