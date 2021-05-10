@@ -47,9 +47,13 @@ install:
   # about it being out of date.
   - "%PYTHON%\\python.exe -m pip install --upgrade pip setuptools"
 
+  - "%PYTHON%\\python.exe -m pip install wheel twine"
+
+  - "set PIP_PREFER_BINARY=yes"
+  - "%PYTHON%\\python.exe -m pip install dwave-tabu"
+
   # Install dependencies
   - "%PYTHON%\\python.exe -m pip install -r requirements.txt -r tests\\requirements.txt"
-  - "%PYTHON%\\python.exe -m pip install wheel twine"
 
 build_script:
   # Build the compiled extension
