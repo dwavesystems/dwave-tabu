@@ -14,11 +14,6 @@
 
 """A dimod :term:`sampler` that uses the MST2 multistart tabu search algorithm."""
 
-import random
-import warnings
-import itertools
-from functools import partial
-
 import numpy as np
 import dimod
 
@@ -46,9 +41,16 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
     parameters = None
 
     def __init__(self):
-        self.parameters = {'tenure': [],
-                           'timeout': [],
-                           'num_reads': []}
+        self.parameters = {
+            'initial_states': [],
+            'initial_states_generator': [],
+            'num_reads': [],
+            'seed': [],
+            'tenure': [],
+            'timeout': [],
+            'num_restarts': [],
+            'energy_threshold': [],
+        }
         self.properties = {}
 
     def sample(self, bqm, initial_states=None, initial_states_generator='random',
@@ -109,7 +111,7 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
                 Terminate when an energy lower than ``energy_threshold`` is found.
 
         Returns:
-            :obj:`~dimod.SampleSet`: A `dimod` :obj:`.~dimod.SampleSet` object.
+            :class:`~dimod.SampleSet`: A `dimod` :class:`.~dimod.SampleSet` object.
 
         Examples:
             This example samples a simple two-variable Ising model.
@@ -170,7 +172,6 @@ class TabuSampler(dimod.Sampler, dimod.Initialized):
             raise ValueError("unknown vartype")
 
         return dimod.SampleSet.from_samples_bqm((samples, varorder), bqm=bqm, num_restarts=restarts)
-
 
     @staticmethod
     def _bqm_to_tabu_qubo(bqm):
