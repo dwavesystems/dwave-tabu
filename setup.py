@@ -76,21 +76,13 @@ extras_require = {
     'test': ['coverage'],
 }
 
-# Setup (extension build) requirements
-setup_requires = ['numpy>=1.16.0']
-
-# We distribute cythonized source, so cython is not required
-# for install (build) from package, but allow manual override via env var
-USE_CYTHON = os.getenv('USE_CYTHON', False)
-
-if USE_CYTHON:
-    setup_requires.append('cython>=0.29.12')
-
 extensions = [
     Extension(
         name='tabu.tabu_search',
-        sources=['./tabu/tabu_search.pyx', './tabu/src/utils.cpp', './tabu/src/bqp.cpp'],
-        include_dirs=['./tabu/src/']), 
+        sources=[
+            'tabu/tabu_search.pyx', 'tabu/src/utils.cpp', 'tabu/src/bqp.cpp'
+        ],
+        include_dirs=['tabu/src/']), 
 ]
 
 classifiers = [
@@ -120,7 +112,6 @@ setup(
     ext_modules=extensions,
     packages=packages,
     install_requires=install_requires,
-    setup_requires=setup_requires,
     extras_require=extras_require,
     zip_safe=False,
     python_requires=python_requires,

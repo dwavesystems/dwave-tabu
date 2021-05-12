@@ -5,33 +5,33 @@ environment:
     secure: 9/YAQhmz9Kb1ZeXzhBYeQA==
 
   matrix:
-    - PYTHON: "C:\\Python36"
-      PYTHON_VERSION: "3.6.x"
-      PYTHON_ARCH: "32"
+    # - PYTHON: "C:\\Python36"
+    #   PYTHON_VERSION: "3.6.x"
+    #   PYTHON_ARCH: "32"
 
-    - PYTHON: "C:\\Python36-x64"
-      PYTHON_VERSION: "3.6.x"
-      PYTHON_ARCH: "64"
+    # - PYTHON: "C:\\Python36-x64"
+    #   PYTHON_VERSION: "3.6.x"
+    #   PYTHON_ARCH: "64"
 
-    - PYTHON: "C:\\Python37"
-      PYTHON_VERSION: "3.7.x"
-      PYTHON_ARCH: "32"
+    # - PYTHON: "C:\\Python37"
+    #   PYTHON_VERSION: "3.7.x"
+    #   PYTHON_ARCH: "32"
 
-    - PYTHON: "C:\\Python37-x64"
-      PYTHON_VERSION: "3.7.x"
-      PYTHON_ARCH: "64"
+    # - PYTHON: "C:\\Python37-x64"
+    #   PYTHON_VERSION: "3.7.x"
+    #   PYTHON_ARCH: "64"
 
-    - PYTHON: "C:\\Python38"
-      PYTHON_VERSION: "3.8.x"
-      PYTHON_ARCH: "32"
+    # - PYTHON: "C:\\Python38"
+    #   PYTHON_VERSION: "3.8.x"
+    #   PYTHON_ARCH: "32"
 
-    - PYTHON: "C:\\Python38-x64"
-      PYTHON_VERSION: "3.8.x"
-      PYTHON_ARCH: "64"
+    # - PYTHON: "C:\\Python38-x64"
+    #   PYTHON_VERSION: "3.8.x"
+    #   PYTHON_ARCH: "64"
 
-    - PYTHON: "C:\\Python39"
-      PYTHON_VERSION: "3.9.x"
-      PYTHON_ARCH: "32"
+    # - PYTHON: "C:\\Python39"
+    #   PYTHON_VERSION: "3.9.x"
+    #   PYTHON_ARCH: "32"
 
     - PYTHON: "C:\\Python39-x64"
       PYTHON_VERSION: "3.9.x"
@@ -46,26 +46,44 @@ install:
   # Upgrade to the latest version of pip to avoid it displaying warnings
   # about it being out of date.
   - "%PYTHON%\\python.exe -m pip install --upgrade pip setuptools"
-
-  # Install dependencies
-  - "%PYTHON%\\python.exe -m pip install -r requirements.txt -r tests\\requirements.txt"
   - "%PYTHON%\\python.exe -m pip install wheel twine"
+  #- "%PYTHON%\\python.exe -m pip install --no-binary dwave-tabu dwave-tabu"
+
+  # provisional build sdist
+  - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
+  - "%PYTHON%\\python.exe setup.py build_ext --inplace"
+  - "%PYTHON%\\python.exe setup.py sdist"
+
+  # then install it
+  # - "%PYTHON%\\python.exe -m venv env"
+  # - "env\\Scripts\\activate"
+  - "%PYTHON%\\python.exe -m pip uninstall numpy dimod cython -y"
+  - "cd .."
+  - "%PYTHON%\\python.exe -m pip install dwave-tabu\\dist\\dwave-tabu-0.4.0.tar.gz"
+
+  # now see what happens!
 
 build_script:
-  # Build the compiled extension
-  - "%PYTHON%\\python.exe setup.py build_ext --inplace"
+  - ps: "ls"
 
-test_script:
-  - "%PYTHON%\\python.exe -m unittest discover"
+#   # Install dependencies
+#   - "%PYTHON%\\python.exe -m pip install -r requirements.txt -r tests\\requirements.txt"
 
-after_test:
-  # If tests are successful, create binary packages for the project.
-  - "%PYTHON%\\python.exe setup.py bdist_wheel"
-  - ps: "ls dist"
+# build_script:
+#   # Build the compiled extension
+#   - "%PYTHON%\\python.exe setup.py build_ext --inplace"
 
-artifacts:
-  # Archive the generated packages in the ci.appveyor.com build report.
-  - path: dist\*
+# test_script:
+#   - "%PYTHON%\\python.exe -m unittest discover"
 
-deploy_script:
-  - cmd: "if [%APPVEYOR_REPO_TAG%]==[true] %PYTHON%\\Scripts\\twine upload --skip-existing dist\\*.whl"
+# after_test:
+#   # If tests are successful, create binary packages for the project.
+#   - "%PYTHON%\\python.exe setup.py bdist_wheel sdist"
+#   - ps: "ls dist"
+
+# artifacts:
+#   # Archive the generated packages in the ci.appveyor.com build report.
+#   - path: dist\*
+
+# deploy_script:
+#   - cmd: "if [%APPVEYOR_REPO_TAG%]==[true] %PYTHON%\\Scripts\\twine upload --skip-existing dist\\*.whl"

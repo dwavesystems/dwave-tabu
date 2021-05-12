@@ -12,15 +12,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "tabu_search.h"
-
 #include <limits>
 
+#include "tabu_search.h"
 #include "common.h"
 #include "utils.h"
 
 using std::vector;
 using std::size_t;
+
 
 TabuSearch::TabuSearch(vector<vector<double>> Q, 
                        const vector<int> initSol, 

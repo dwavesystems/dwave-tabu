@@ -4,6 +4,8 @@ jobs:
     docker:
       - image: circleci/python:3.9
 
+    resource_class: arm.large
+
     working_directory: ~/repo
 
     steps:
@@ -76,7 +78,7 @@ jobs:
           name: create bdist_wheel
           command: |
             . env/bin/activate
-            python setup.py bdist_wheel
+            python setup.py bdist_wheel --py-limited-api=cp36
 
       - store_artifacts:
           path: ./dist
@@ -151,7 +153,10 @@ jobs:
 
       - run: *sdist-build-template
 
-      - run: *wheel-build-template
+      - run:
+          command: |
+            . env/bin/activate
+            CFLAGS="-mmacosx-version-min=10.9 -march=core2" python setup.py bdist_wheel --py-limited-api=cp36
 
       - store_artifacts:
           path: ./dist
