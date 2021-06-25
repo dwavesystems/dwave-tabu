@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from Cython.Build import cythonize
@@ -47,52 +45,13 @@ class build_ext_with_args(build_ext):
         super().build_extensions()
 
 
-# Load package info, without importing the package
-basedir = os.path.dirname(os.path.abspath(__file__))
-package_info_path = os.path.join(basedir, "tabu", "package_info.py")
-package_info = {}
-with open(package_info_path, encoding='utf-8') as f:
-    exec(f.read(), package_info)
-
-packages = ['tabu']
-
-# Package requirements, minimal pinning
-install_requires = ['numpy>=1.16.0', 'dimod>=0.9.0']
-
 extensions = [Extension(
     name='tabu.tabu_search',
     sources=['tabu/tabu_search.pyx', 'tabu/src/utils.cpp', 'tabu/src/bqp.cpp'],
     include_dirs=[numpy.get_include()]
 )]
 
-
-classifiers = [
-    'License :: OSI Approved :: Apache Software License',
-    'Operating System :: OS Independent',
-    'Development Status :: 3 - Alpha',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: 3.8',
-    'Programming Language :: Python :: 3.9',
-]
-
-python_requires = '>=3.6'
-
 setup(
-    name=package_info['__packagename__'],
-    version=package_info['__version__'],
-    author=package_info['__author__'],
-    author_email=package_info['__authoremail__'],
-    description=package_info['__description__'],
-    long_description=open('README.rst', encoding='utf-8').read(),
-    url=package_info['__url__'],
-    license=package_info['__license__'],
-    classifiers=classifiers,
     cmdclass={'build_ext': build_ext_with_args},
     ext_modules=cythonize(extensions),
-    packages=packages,
-    python_requires=python_requires,
-    install_requires=install_requires,
-    zip_safe=False,
 )
