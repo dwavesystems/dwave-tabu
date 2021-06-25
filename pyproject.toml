@@ -6,3 +6,19 @@ requires = [
     "numpy==1.19.4",
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.coverage.run]
+source = ["tabu"]
+omit = [
+    "env/*",
+    "*/tests/*",
+    "tabu/src/*",
+    "tabu/package_info.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
