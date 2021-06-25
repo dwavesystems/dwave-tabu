@@ -1,14 +1,28 @@
+# Copyright 2021 D-Wave Systems Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
-from io import open
+
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
+from Cython.Build import cythonize
+import numpy
 
 
-class cythonizing_build_ext(build_ext):
-    """Cython extensions adaptive build: cythonize if possible, include numpy
-    headers, add custom compile/link flags."""
+class build_ext_with_args(build_ext):
+    """Add compiler-specific compile/link flags."""
 
-    # Custom extension compile/link flags
     extra_compile_args = {
         'msvc': ['/std:c++14'],
         'unix': ['-std=c++11'],
@@ -16,48 +30,22 @@ class cythonizing_build_ext(build_ext):
 
     extra_link_args = {
         'msvc': [],
-        'unix': [],
+        'unix': ['-std=c++11'],
     }
 
     def build_extensions(self):
-        # try using cython if available, fallback to using pre-cythonized
-        # files (if they exist; if not, ultimately fail)
-        try:
-            from Cython.Build import cythonize
-
-            # cythonization step will remove this flag needed by setuptools
-            _needs_stub = [ext._needs_stub for ext in self.extensions]
-
-            self.extensions = cythonize(self.extensions)
-
-            # restore _needs_stub flags for setuptools
-            for ext, ns in zip(self.extensions, _needs_stub):
-                ext._needs_stub = ns
-
-        except ImportError:
-            # cython not available, assume cythonized cpp files exist
-            for ext in self.extensions:
-                ext.sources = [source.replace(".pyx", ".cpp") for source in ext.sources]
-
-        # add compiler/linker flags
         compiler = self.compiler.compiler_type
 
         compile_args = self.extra_compile_args[compiler]
         for ext in self.extensions:
             ext.extra_compile_args = compile_args
 
-        link_args = self.extra_compile_args[compiler]
+        link_args = self.extra_link_args[compiler]
         for ext in self.extensions:
             ext.extra_compile_args = link_args
 
-        build_ext.build_extensions(self)
+        super().build_extensions()
 
-    def finalize_options(self):
-        build_ext.finalize_options(self)
-
-        # add numpy include files
-        import numpy
-        self.include_dirs.append(numpy.get_include())
 
 # Load package info, without importing the package
 basedir = os.path.dirname(os.path.abspath(__file__))
@@ -71,27 +59,12 @@ packages = ['tabu']
 # Package requirements, minimal pinning
 install_requires = ['numpy>=1.16.0', 'dimod>=0.9.0']
 
-# Package extras requirements
-extras_require = {
-    'test': ['coverage'],
-}
+extensions = [Extension(
+    name='tabu.tabu_search',
+    sources=['tabu/tabu_search.pyx', 'tabu/src/utils.cpp', 'tabu/src/bqp.cpp'],
+    include_dirs=[numpy.get_include()]
+)]
 
-# Setup (extension build) requirements
-setup_requires = ['numpy>=1.16.0']
-
-# We distribute cythonized source, so cython is not required
-# for install (build) from package, but allow manual override via env var
-USE_CYTHON = os.getenv('USE_CYTHON', False)
-
-if USE_CYTHON:
-    setup_requires.append('cython>=0.29.12')
-
-extensions = [
-    Extension(
-        name='tabu.tabu_search',
-        sources=['./tabu/tabu_search.pyx', './tabu/src/utils.cpp', './tabu/src/bqp.cpp'],
-        include_dirs=['./tabu/src/']), 
-]
 
 classifiers = [
     'License :: OSI Approved :: Apache Software License',
@@ -116,12 +89,10 @@ setup(
     url=package_info['__url__'],
     license=package_info['__license__'],
     classifiers=classifiers,
-    cmdclass={'build_ext': cythonizing_build_ext},
-    ext_modules=extensions,
+    cmdclass={'build_ext': build_ext_with_args},
+    ext_modules=cythonize(extensions),
     packages=packages,
-    install_requires=install_requires,
-    setup_requires=setup_requires,
-    extras_require=extras_require,
-    zip_safe=False,
     python_requires=python_requires,
+    install_requires=install_requires,
+    zip_safe=False,
 )
