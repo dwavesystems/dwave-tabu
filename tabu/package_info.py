@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__packagename__ = 'dwave-tabu'
-__title__ = 'D-Wave Tabu'
-__version__ = '0.4.0'
+from tabu import __version__, __package_name__
+
 __author__ = 'D-Wave Systems Inc.'
-__authoremail__ = 'tools@dwavesys.com'
+__author_email__ = 'tools@dwavesys.com'
 __description__ = 'Optimized Tabu solver for QUBOs'
 __url__ = 'https://github.com/dwavesystems/dwave-tabu'
 __license__ = 'Apache 2.0'
-__copyright__ = '2018, D-Wave Systems Inc.'

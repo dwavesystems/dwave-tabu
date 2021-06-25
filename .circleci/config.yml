@@ -1,363 +1,123 @@
-version: 2
+version: 2.1
+
+parameters:
+  package:
+    type: string
+    default: dwave-tabu
+
+orbs:
+  ocean: dwave/ocean@1.1
+
+environment:
+  PIP_PROGRESS_BAR: off
+
 jobs:
-  test-3.9: &full-test-template
-    docker:
-      - image: circleci/python:3.9
-
-    working_directory: ~/repo
-
-    steps:
-      - checkout
-
-      - restore_cache: &restore-cache-template
-          keys:
-          - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "tests/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
-
-      - run:
-          name: create virtualenv
-          command: |
-            python -m virtualenv env
-
-      - run: &install-dependencies-template
-          name: install dependencies
-          command: |
-            . env/bin/activate
-            python --version
-            pip install -r requirements.txt -r tests/requirements.txt
-
-      - save_cache: &save-cache-template
-          paths:
-            - ./env
-          key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "tests/requirements.txt" }}-{{ .Environment.CIRCLE_JOB }}
-
-      - run: &install-package-template
-          name: install package
-          command: |
-            . env/bin/activate
-            python setup.py build_ext --inplace
-
-      - run: &run-tests-template
-          name: run unittests
-          command: |
-            . env/bin/activate
-            python --version
-            coverage run -m unittest discover
-
-      - store_artifacts:
-          path: ./htmlcov
-
-#      - run:
-#          name: codecov
-#          command: |
-#            . env/bin/activate
-#            codecov
-
-      - run:
-          name: doctest
-          command: |
-            . env/bin/activate
-            pip install -r requirements.txt -r docs/requirements.txt
-            python setup.py install
-            make -C docs/ doctest
-
-      - run:
-          name: linkcheck
-          command: |
-            . env/bin/activate
-            make -C docs/ linkcheck
-
-      - run: &sdist-build-template
-          name: build sdist
-          command: |
-            . env/bin/activate
-            python setup.py sdist
-
-      - run: &wheel-build-template
-          name: create bdist_wheel
-          command: |
-            . env/bin/activate
-            python setup.py bdist_wheel
-
-      - store_artifacts:
-          path: ./dist
-
-  test-3.8:
-    <<: *full-test-template
-    docker:
-      - image: circleci/python:3.8
-
-  test-3.7:
-    <<: *full-test-template
-    docker:
-      - image: circleci/python:3.7
-
-  test-3.6:
-    <<: *full-test-template
-    docker:
-      - image: circleci/python:3.6
-
-  test-osx-3.9: &osx-tests-template
-    macos:
-      xcode: "12.1.0"
-    environment:
-      PYTHON: 3.9.0
-
-      # Force (lie about) macOS 10.9 binary compatibility.
-      # Needed for properly versioned wheels.
-      # See: https://github.com/MacPython/wiki/wiki/Spinning-wheels
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-    working_directory: ~/repo
-
-    steps:
-      - checkout
-
-      - run:
-          name: install pyenv
-          command: |
-            HOMEBREW_NO_AUTO_UPDATE=1 brew install pyenv
-
-      - restore_cache:
-          keys:
-            - pyenv-{{ .Environment.CIRCLE_JOB }}-xcode-12.1.0
-
-      - run:
-          name: install python
-          command: |
-            pyenv install $PYTHON -s
-
-      - save_cache:
-          paths:
-            - ~/.pyenv
-          key: pyenv-{{ .Environment.CIRCLE_JOB }}-xcode-12.1.0
-
-      - run:
-          name: create virtualenv
-          command: |
-            eval "$(pyenv init -)"
-            pyenv local $PYTHON
-            python -m pip install virtualenv
-            python -m virtualenv env
-
-      - restore_cache: *restore-cache-template
-
-      - run: *install-dependencies-template
-
-      - save_cache: *save-cache-template
-
-      - run: *install-package-template
-
-      - run: *run-tests-template
-
-      - run: *sdist-build-template
-
-      - run: *wheel-build-template
-
-      - store_artifacts:
-          path: ./dist
-
-  test-osx-3.8:
-    <<: *osx-tests-template
-    environment:
-      PYTHON: 3.8.6
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-  test-osx-3.7:
-    <<: *osx-tests-template
-    environment:
-      PYTHON: 3.7.4
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-  test-osx-3.6:
-    <<: *osx-tests-template
-    environment:
-      PYTHON: 3.6.5
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-  test-cpp11:
+  test-cpp:
     docker:
       # just use a python image, all we really want is debian
       - image: circleci/python:3.8-buster
 
-    working_directory: ~/repo
-
     steps:
       - checkout
-
-      - run: &run-cpp-template
-          name: run cpp tests
+      - run:
+          name: Run C++ tests
           command: |
             make -C testscpp/ --always-make
 
-##################################################################################################
-# Deploy
-##################################################################################################
-
-  build-manylinux-64: &manylinux-template
-    docker:
-      - image: quay.io/pypa/manylinux1_x86_64
-
-    working_directory: ~/repo
-
-    steps:
-      - checkout
-
-      - run:
-          name: build wheels
-          command: |
-            for PYBIN in /opt/python/*/bin; do
-              if "${PYBIN}/python" -c "import sys; sys.exit(sys.version_info>=(3, 6))"; then continue; fi;
-              "${PYBIN}/pip" install -r requirements.txt
-              "${PYBIN}/python" setup.py build_ext --inplace
-              "${PYBIN}/python" setup.py bdist_wheel -d ./wheelhouse
-              "${PYBIN}/python" setup.py sdist -d ./dist
-            done
-
-      - run:
-          name: bundle shared libraries into wheels
-          command: |
-            for whl in ./wheelhouse/dwave*tabu*.whl; do
-              auditwheel repair "$whl" -w ./dist
-            done
-
-      - store_artifacts:
-          path: ./dist
-
-      - run:
-          name: create a virtualenv
-          command: |
-            pythons=(/opt/python/*/bin)
-            python="${pythons[0]}"
-            "$python/pip" install virtualenv
-            "$python/python" -m virtualenv env
-
-      - run: &upload-template
-          name: install twine and deploy
-          command: |
-            . env/bin/activate
-            python -m pip install twine
-            twine upload -u "$PYPI_USERNAME" -p "$PYPI_PASSWORD" --skip-existing ./dist/*
-
-  build-manylinux-32:
-    <<: *manylinux-template
-    docker:
-      - image: quay.io/pypa/manylinux1_i686
-
-  build-osx-3.9: &osx-build-template
-    macos:
-      xcode: "12.1.0"
-    environment:
-      PYTHON: 3.9.0
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-    working_directory: ~/repo
-
-    steps:
-      - checkout
-
-      - run:
-          name: install pyenv
-          command: |
-            HOME_NO_AUTO_UPDATE=1 brew install pyenv
-
-      - restore_cache:
-          keys:
-            - pyenv-{{ .Environment.CIRCLE_JOB }}-xcode-12.1.0
-
-      - run:
-          name: install python
-          command: |
-            pyenv install $PYTHON -s
-
-      - save_cache:
-          paths:
-            - ~/.pyenv
-          key: pyenv-{{ .Environment.CIRCLE_JOB }}-xcode-12.1.0
-
-      - run:
-          name: create virtualenv
-          command: |
-            eval "$(pyenv init -)"
-            pyenv local $PYTHON
-            python -m pip install virtualenv
-            python -m virtualenv env
-
-      - run: *install-dependencies-template
-
-      - run: *install-package-template
-
-      - run: *wheel-build-template
-
-      - store_artifacts:
-          path: ./dist
-
-      - run: *upload-template
-
-  build-osx-3.8:
-    <<: *osx-build-template
-    environment:
-      PYTHON: 3.8.6
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-  build-osx-3.7:
-    <<: *osx-build-template
-    environment:
-      PYTHON: 3.7.4
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
-  build-osx-3.6:
-    <<: *osx-build-template
-    environment:
-      PYTHON: 3.6.5
-      MACOSX_DEPLOYMENT_TARGET: 10.9
-
 workflows:
-  version: 2
-  test:
+  build-test-deploy:
     jobs:
-      - test-3.9
-      - test-3.8
-      - test-3.7
-      - test-3.6
-      - test-osx-3.9
-      - test-osx-3.8
-      - test-osx-3.7
-      - test-osx-3.6
-      - test-cpp11
+      - ocean/build-sdist:
+          filters: &always-run  # required because it's indirectly required by the deploy job that runs on tags only
+            tags:
+              only: /.*/
 
-  deploy:
-    jobs:
-      - build-manylinux-64:
+      - ocean/build-manylinux-wheel:
+          name: build-<< matrix.manylinux-tag >>_<< matrix.manylinux-arch >>-py<< matrix.python-version >>
+          matrix:
+            parameters:
+              manylinux-tag: ["manylinux1", "manylinux2014"]
+              manylinux-arch: ["x86_64"]
+              python-version: &python-versions ["3.6.8", "3.7.9", "3.8.9", "3.9.4"]
           filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*((\.dev|rc)([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-manylinux-32:
+            <<: *always-run
+
+      - ocean/test-linux-from-dist:
+          name: test-linux-py<< matrix.python-version >>
+          requires:
+            - ocean/build-sdist
+            - ocean/build-manylinux-wheel
+            - test-cpp
+          matrix:
+            parameters:
+              python-version: *python-versions
+              package: [<< pipeline.parameters.package >>]
           filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*((\.dev|rc)([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-osx-3.9:
+            <<: *always-run
+
+      - test-cpp:
           filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*((\.dev|rc)([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-osx-3.8:
+            <<: *always-run
+
+      - ocean/test-docs:
+          name: test-docs
+          requires:
+            - ocean/build-sdist
+            - ocean/build-manylinux-wheel
+          matrix:
+            parameters:
+              package: [<< pipeline.parameters.package >>]
           filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*((\.dev|rc)([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-osx-3.7:
+            <<: *always-run
+
+      - ocean/build-macos-wheel:
+          name: build-macos-py<< matrix.python-version >>
+          matrix:
+            parameters:
+              python-version: *python-versions
           filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*((\.dev|rc)([0-9]+)?)?$/
-            branches:
-              ignore: /.*/
-      - build-osx-3.6:
+            <<: *always-run
+
+      - ocean/test-macos-from-dist:
+          name: test-macos-py<< matrix.python-version >>
+          requires:
+            - ocean/build-sdist
+            - ocean/build-macos-wheel
+            - test-cpp
+          matrix:
+            parameters:
+              python-version: *python-versions
+              package: [<< pipeline.parameters.package >>]
+          filters:
+            <<: *always-run
+
+      - ocean/build-windows-wheel:
+          name: build-win-<< matrix.python-arch >>-py<< matrix.python-version >>
+          matrix:
+            parameters:
+              python-version: *python-versions
+              python-arch: &python-archs-win ["", "x86"]
+          filters:
+            <<: *always-run
+
+      - ocean/test-windows-from-dist:
+          name: test-win-<< matrix.python-arch >>-py<< matrix.python-version >>
+          requires:
+            - ocean/build-windows-wheel
+          matrix:
+            parameters:
+              python-version: *python-versions
+              python-arch: *python-archs-win
+              package: [<< pipeline.parameters.package >>]
+          filters:
+            <<: *always-run
+
+      - ocean/pypi-deploy:
+          requires:
+            - ocean/test-linux-from-dist
+            - ocean/test-macos-from-dist
+            - ocean/test-windows-from-dist
+            - ocean/test-docs
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*((\.dev|rc)([0-9]+)?)?$/

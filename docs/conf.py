@@ -11,15 +11,17 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-from io import open
-import os
-import sys
-sys.path.insert(0, os.path.abspath('.'))
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Note: make sure the package is installed when building docs.
+
+# -- Project information -----------------------------------------------------
+
+from tabu import package_info
+project = 'D-Wave Tabu'
+copyright = '2018, D-Wave Systems Inc.'
+author = package_info.__author__
+version = package_info.__version__
+release = package_info.__version__
+
 
 # -- General configuration ------------------------------------------------
 # import sphinx
@@ -55,26 +57,6 @@ source_suffix = ['.rst', '.md']
 # The master toctree document.
 master_doc = 'index'
 
-# Mock the C++ extension on RtD (where we can't build_ext)
-if os.getenv('READTHEDOCS'):
-    autodoc_mock_imports = ["tabu.tabu_search"]
-
-# Load package info, without importing the package
-basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-package_info_path = os.path.join(basedir, "tabu", "package_info.py")
-package_info = {}
-try:
-    with open(package_info_path, encoding='utf-8') as f:
-        exec(f.read(), package_info)
-except SyntaxError:
-    execfile(package_info_path, package_info)
-
-# General information about the project.
-project = package_info['__title__']
-copyright = package_info['__copyright__']
-author = package_info['__author__']
-version = package_info['__version__']
-release = package_info['__version__']
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -97,7 +79,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'sdk_index.rst']
 
 linkcheck_retries = 2
 linkcheck_anchors = False
-linkcheck_ignore = [r'https://cloud.dwavesys.com/leap',  # redirects, many checks
+linkcheck_ignore = ['https://cloud.dwavesys.com/leap',  # redirects, many checks
                     ]
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -137,7 +119,7 @@ def setup(app):
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
-    'qbsolv': ('https://docs.ocean.dwavesys.com/projects/qbsolv/en/latest/', None),
-    'oceandocs': ('https://docs.ocean.dwavesys.com/en/latest/', None),
-    'sysdocs_gettingstarted': ('https://docs.dwavesys.com/docs/latest/', None),
+    'qbsolv': ('https://docs.ocean.dwavesys.com/projects/qbsolv/en/stable/', None),
+    'oceandocs': ('https://docs.ocean.dwavesys.com/en/stable/', None),
+    'sysdocs_gettingstarted': ('https://docs.dwavesys.com/docs/stable/', None),
 }
