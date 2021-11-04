@@ -6,7 +6,7 @@ parameters:
     default: dwave-tabu
 
 orbs:
-  ocean: dwave/ocean@1.2
+  ocean: dwave/ocean@dev:f8d3a15
 
 environment:
   PIP_PROGRESS_BAR: off
