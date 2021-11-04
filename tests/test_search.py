@@ -18,12 +18,13 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor, wait
 
 import dimod
-import tabu
 import numpy as np
-from hybrid.testing import RunTimeAssertionMixin
+
+import tabu
+from tabu.utils import tictoc
 
 
-class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
+class TestTabuSearch(unittest.TestCase):
 
     def test_trivial(self):
         qubo = [[1.0]]
@@ -62,13 +63,15 @@ class TestTabuSearch(unittest.TestCase, RunTimeAssertionMixin):
 
         with ThreadPoolExecutor(max_workers=3) as executor:
 
-            # ~ 500 ms (but be gracious on slow CI VMs)
-            with self.assertRuntimeWithin(400, 1600):
+            # ~ 0.5s (but be gracious on slow CI VMs)
+            with tictoc() as tt:
                 wait([executor.submit(search, timeout=500) for _ in range(3)])
+            self.assertTrue(0.4 < tt.dt < 1.6)
 
-            # ~ 1000 ms (but be gracious on slow CI VMs)
-            with self.assertRuntimeWithin(900, 2100):
+            # ~ 1s (but be gracious on slow CI VMs)
+            with tictoc() as tt:
                 wait([executor.submit(search, timeout=500) for _ in range(4)])
+            self.assertTrue(0.9 < tt.dt < 2.1)
 
     def test_float(self):
         n = 20

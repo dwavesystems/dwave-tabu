@@ -15,15 +15,16 @@
 """Test the TabuSampler python interface."""
 
 import unittest
-import time
 
 import dimod
-import tabu
 import numpy as np
-from hybrid.testing import RunTimeAssertionMixin
+
+import tabu
+from tabu.utils import tictoc
+
 
 @dimod.testing.load_sampler_bqm_tests(tabu.TabuSampler)
-class TestTabuSampler(unittest.TestCase, RunTimeAssertionMixin):
+class TestTabuSampler(unittest.TestCase):
 
     def test_instantiation(self):
         sampler = tabu.TabuSampler()
@@ -229,17 +230,13 @@ class TestTabuSampler(unittest.TestCase, RunTimeAssertionMixin):
         sampler = tabu.TabuSampler()
         bqm = dimod.BinaryQuadraticModel.from_ising({}, {'ab': -1, 'bc': 1, 'ac': 1})
 
-        start_time = time.perf_counter()
-        response = sampler.sample(bqm, num_reads=1, timeout=500, seed=123)
-        run_time = time.perf_counter() - start_time
+        with tictoc() as tt:
+            response = sampler.sample(bqm, num_reads=1, timeout=500, seed=123)
+        self.assertAlmostEqual(tt.dt, 0.5, places=1)
 
-        self.assertAlmostEqual(run_time, 0.5, places=1)
-
-        start_time = time.perf_counter()
-        response = sampler.sample(bqm, num_reads=3, timeout=200, seed=123)
-        run_time = time.perf_counter() - start_time
-
-        self.assertAlmostEqual(run_time, 0.6, places=1)
+        with tictoc() as tt:
+            response = sampler.sample(bqm, num_reads=3, timeout=200, seed=123)
+        self.assertAlmostEqual(tt.dt, 0.6, places=1)
 
     def test_num_restarts(self):
         sampler = tabu.TabuSampler()
@@ -256,6 +253,8 @@ class TestTabuSampler(unittest.TestCase, RunTimeAssertionMixin):
         bqm = dimod.generators.random.randint(100, 'SPIN', seed=123)
         energy_threshold = -400
 
-        with self.assertRuntimeWithin(0, 1000):
-            # Expect that energy_threshold is met before timeout
+        # Expect that energy_threshold is met before timeout
+        with tictoc() as tt:
             response = sampler.sample(bqm, timeout=100000, energy_threshold=energy_threshold, seed=345)
+
+        self.assertLessEqual(tt.dt, 1.0)
