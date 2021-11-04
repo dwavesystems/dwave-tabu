@@ -15,7 +15,6 @@
 """Test the TabuSampler python interface."""
 
 import unittest
-import time
 
 import dimod
 import numpy as np
@@ -231,17 +230,13 @@ class TestTabuSampler(unittest.TestCase):
         sampler = tabu.TabuSampler()
         bqm = dimod.BinaryQuadraticModel.from_ising({}, {'ab': -1, 'bc': 1, 'ac': 1})
 
-        start_time = time.perf_counter()
-        response = sampler.sample(bqm, num_reads=1, timeout=500, seed=123)
-        run_time = time.perf_counter() - start_time
+        with tictoc() as tt:
+            response = sampler.sample(bqm, num_reads=1, timeout=500, seed=123)
+        self.assertAlmostEqual(tt.dt, 0.5, places=1)
 
-        self.assertAlmostEqual(run_time, 0.5, places=1)
-
-        start_time = time.perf_counter()
-        response = sampler.sample(bqm, num_reads=3, timeout=200, seed=123)
-        run_time = time.perf_counter() - start_time
-
-        self.assertAlmostEqual(run_time, 0.6, places=1)
+        with tictoc() as tt:
+            response = sampler.sample(bqm, num_reads=3, timeout=200, seed=123)
+        self.assertAlmostEqual(tt.dt, 0.6, places=1)
 
     def test_num_restarts(self):
         sampler = tabu.TabuSampler()
