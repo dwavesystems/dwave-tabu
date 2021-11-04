@@ -18,12 +18,14 @@ import unittest
 import time
 
 import dimod
-import tabu
 import numpy as np
-from hybrid.testing import RunTimeAssertionMixin
+
+import tabu
+from tabu.utils import tictoc
+
 
 @dimod.testing.load_sampler_bqm_tests(tabu.TabuSampler)
-class TestTabuSampler(unittest.TestCase, RunTimeAssertionMixin):
+class TestTabuSampler(unittest.TestCase):
 
     def test_instantiation(self):
         sampler = tabu.TabuSampler()
@@ -256,6 +258,8 @@ class TestTabuSampler(unittest.TestCase, RunTimeAssertionMixin):
         bqm = dimod.generators.random.randint(100, 'SPIN', seed=123)
         energy_threshold = -400
 
-        with self.assertRuntimeWithin(0, 1000):
-            # Expect that energy_threshold is met before timeout
+        # Expect that energy_threshold is met before timeout
+        with tictoc() as tt:
             response = sampler.sample(bqm, timeout=100000, energy_threshold=energy_threshold, seed=345)
+
+        self.assertLessEqual(tt.dt, 1.0)

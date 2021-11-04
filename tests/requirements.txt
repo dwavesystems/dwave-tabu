@@ -1,3 +1,2 @@
 coverage[toml]
 codecov
-dwave-hybrid
