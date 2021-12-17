@@ -9,7 +9,7 @@ orbs:
   ocean: dwave/ocean@1.2
 
 environment:
-  PIP_PROGRESS_BAR: off
+  PIP_PROGRESS_BAR: 'off'
 
 jobs:
   test-cpp:
@@ -38,7 +38,7 @@ workflows:
             parameters:
               manylinux-tag: ["manylinux1", "manylinux2014"]
               manylinux-arch: ["x86_64"]
-              python-version: &python-versions ["3.6.8", "3.7.9", "3.8.9", "3.9.4"]
+              python-version: &python-versions ["3.6.8", "3.7.9", "3.8.9", "3.9.4", "3.10.0"]
           filters:
             <<: *always-run
 
@@ -53,6 +53,9 @@ workflows:
               python-version: *python-versions
               package: [<< pipeline.parameters.package >>]
               constraints: ["dimod~=0.9.0", "dimod~=0.10.0"]
+            exclude:
+              - python-version: "3.10.0"
+                constraints: "dimod~=0.9.0"
           filters:
             <<: *always-run
 
