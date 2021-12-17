@@ -79,6 +79,7 @@ workflows:
           matrix:
             parameters:
               python-version: *python-versions
+              xcode: ["13.2.0"]
           filters:
             <<: *always-run
 
@@ -91,6 +92,7 @@ workflows:
           matrix:
             parameters:
               python-version: *python-versions
+              xcode: ["13.2.0"]
               package: [<< pipeline.parameters.package >>]
           filters:
             <<: *always-run
