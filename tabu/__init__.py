@@ -13,7 +13,7 @@
 # limitations under the License.
 
 __package_name__ = 'dwave-tabu'
-__version__ = '0.4.2'
+__version__ = '0.4.3rc0'
 
 __all__ = ['TabuSearch', 'TabuSampler']
 
