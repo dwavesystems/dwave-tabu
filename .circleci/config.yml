@@ -109,11 +109,7 @@ workflows:
           matrix:
             parameters:
               python-version: *python-versions
-              python-arch: &python-archs-win ["", "x86"]
-            exclude:
-              # numpy not supported on py310 @ win32
-              - python-version: "3.10.0"
-                python-arch: "x86"
+              python-arch: &python-archs-win [""]
           filters:
             <<: *always-run
 
@@ -126,11 +122,6 @@ workflows:
               python-version: *python-versions
               python-arch: *python-archs-win
               package: [<< pipeline.parameters.package >>]
-            exclude:
-              # numpy not supported on py310 @ win32
-              - python-version: "3.10.0"
-                python-arch: "x86"
-                package: << pipeline.parameters.package >>
           filters:
             <<: *always-run
 
