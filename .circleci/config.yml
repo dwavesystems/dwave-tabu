@@ -38,7 +38,7 @@ workflows:
             parameters:
               manylinux-tag: ["manylinux1", "manylinux2014"]
               manylinux-arch: ["x86_64"]
-              python-version: &python-versions ["3.6.8", "3.7.9", "3.8.9", "3.9.4", "3.10.0"]
+              python-version: &python-versions ["3.7.9", "3.8.9", "3.9.4", "3.10.0"]
             exclude:
               # py310 not available in manylinux1_x86_64
               - manylinux-tag: "manylinux1"
@@ -63,10 +63,6 @@ workflows:
               - python-version: "3.10.0"
                 package: << pipeline.parameters.package >>
                 constraints: "dimod~=0.9.0"
-              # dimod 0.11 not supported on py36
-              - python-version: "3.6.8"
-                package: << pipeline.parameters.package >>
-                constraints: "dimod~=0.11.0"
           filters:
             <<: *always-run
 
@@ -113,11 +109,7 @@ workflows:
           matrix:
             parameters:
               python-version: *python-versions
-              python-arch: &python-archs-win ["", "x86"]
-            exclude:
-              # numpy not supported on py310 @ win32
-              - python-version: "3.10.0"
-                python-arch: "x86"
+              python-arch: &python-archs-win [""]
           filters:
             <<: *always-run
 
@@ -130,11 +122,6 @@ workflows:
               python-version: *python-versions
               python-arch: *python-archs-win
               package: [<< pipeline.parameters.package >>]
-            exclude:
-              # numpy not supported on py310 @ win32
-              - python-version: "3.10.0"
-                python-arch: "x86"
-                package: << pipeline.parameters.package >>
           filters:
             <<: *always-run
 
