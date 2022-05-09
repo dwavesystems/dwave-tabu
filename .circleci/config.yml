@@ -57,7 +57,7 @@ workflows:
             parameters:
               python-version: *python-versions
               package: [<< pipeline.parameters.package >>]
-              constraints: ["dimod~=0.9.0", "dimod~=0.10.0", "dimod==0.11.0rc0"]
+              constraints: ["dimod~=0.9.0", "dimod~=0.10.0", "dimod~=0.11.0"]
             exclude:
               # dimod < 0.10 not supported on py310
               - python-version: "3.10.0"
@@ -66,7 +66,7 @@ workflows:
               # dimod 0.11 not supported on py36
               - python-version: "3.6.8"
                 package: << pipeline.parameters.package >>
-                constraints: "dimod==0.11.0rc0"
+                constraints: "dimod~=0.11.0"
           filters:
             <<: *always-run
 
