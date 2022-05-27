@@ -6,7 +6,7 @@ parameters:
     default: dwave-tabu
 
 orbs:
-  ocean: dwave/ocean@1.3
+  ocean: dwave/ocean@1.4
 
 environment:
   PIP_PROGRESS_BAR: 'off'
@@ -47,6 +47,15 @@ workflows:
           filters:
             <<: *always-run
 
+      - ocean/cibw-build-linux-aarch64-wheel:
+          name: build-<< matrix.manylinux-tag >>_aarch64-py<< matrix.python-version >>
+          matrix:
+            parameters:
+              manylinux-tag: ["manylinux2014"]
+              python-version: *python-versions
+          filters:
+            <<: *always-run
+
       - ocean/test-linux-from-dist:
           name: test-linux-py<< matrix.python-version >>|<< matrix.constraints >>
           requires:
@@ -81,12 +90,12 @@ workflows:
           filters:
             <<: *always-run
 
-      - ocean/build-macos-wheel:
+      - ocean/cibw-build-macos-wheel:
           name: build-macos-py<< matrix.python-version >>
           matrix:
             parameters:
               python-version: *python-versions
-              xcode: ["13.2.0"]
+              cibw-archs: ["x86_64 universal2"]
           filters:
             <<: *always-run
 
@@ -94,7 +103,7 @@ workflows:
           name: test-macos-py<< matrix.python-version >>
           requires:
             - ocean/build-sdist
-            - ocean/build-macos-wheel
+            - ocean/cibw-build-macos-wheel
             - test-cpp
           matrix:
             parameters:
