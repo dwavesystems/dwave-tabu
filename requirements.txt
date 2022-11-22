@@ -1,8 +1,1 @@
-numpy==1.19.5; python_version < "3.10"
-numpy==1.21.4; python_version >= "3.10"
-dimod==0.10.10
-cython==0.29.21
-
-# build
-wheel>=0.30.0
-setuptools>=56.2.0
+dwave-samplers==1.0.0.dev2

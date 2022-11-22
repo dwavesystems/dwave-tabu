@@ -1,3 +1,5 @@
+> :warning: **Note**: *dwave-tabu* is deprecated in favor of `dwave-samplers <https://github.com/dwavesystems/dwave-samplers>`_.
+
 .. image:: https://circleci.com/gh/dwavesystems/dwave-tabu.svg?style=svg
     :target: https://circleci.com/gh/dwavesystems/dwave-tabu
     :alt: Linux/MacOS/Windows build status
@@ -42,24 +44,6 @@ Installation
 Install from a wheel on PyPI::
 
     pip install dwave-tabu
-
-or install from source:
-
-.. code-block:: bash
-
-    pip install git+https://github.com/dwavesystems/dwave-tabu.git#egg=dwave-tabu
-
-Note: installation from source involves a "cythonization" step. To install
-project requirements automatically, make sure to use a PEP-517 compliant pip,
-e.g. ``pip>=10.0``.
-
-To build from source:
-
-.. code-block:: bash
-
-    pip install -r requirements.txt
-    python setup.py build_ext --inplace
-    python setup.py install
 
 .. installation-end-marker
 
